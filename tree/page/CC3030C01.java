@@ -18,13 +18,20 @@ import org.slf4j.LoggerFactory;
 import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page.CC3030C01;
 import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.service.CC3030S01;
 import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.service.CC3030S01Mockup;
+import jp.co.canonits.prognerex.aptemplate_desktopaplike.CX1010.service.CX1010S01;
+import jp.co.canonits.prognerex.aptemplate_desktopaplike.CX1010.service.CX1010S01.Choices;
 import jp.co.canonits.prognerex.aptemplate_desktopaplike.dto.LoginModel;
 import jp.co.canonits.prognerex.aptemplate_desktopaplike.page.BasePage;
 import jp.co.canonits.prognerex.aptemplate_desktopaplike.session.AppSession;
+import jp.co.canonits.prognerex.core.common.exception.LogicalException;
+import jp.co.canonits.prognerex.core.presentation_wicket.component.ExDropDownItem;
 import jp.co.canonits.prognerex.core.presentation_wicket.component.ExFieldSet;
 import jp.co.canonits.prognerex.core.presentation_wicket.component.ExLabel;
 import jp.co.canonits.prognerex.core.presentation_wicket.component.ExTextField;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 public class CC3030C01 extends BasePage {
@@ -167,7 +174,17 @@ public class CC3030C01 extends BasePage {
         
         
         FooProvider provider = new FooProvider();
+//        ExNestedTreeProvider<Foo> provider = new ExNestedTreeProvider<Foo>(){
+//
+//            private static final long serialVersionUID = 1L;
+//
+//            @Override
+//            public Iterator<Foo> getRoots(){
+//                return FooList.getList().iterator();
+//            }
+//        };
         tree = new NestedTree<Foo>("tree", provider, new FooExpansionModel()){
+//        tree = new NestedTree<Foo>("tree", provider){
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -175,6 +192,8 @@ public class CC3030C01 extends BasePage {
                return CC3030C01.this.newContentComponent(_id, _model);
             }
          };
+//         Iterator<Foo> it = provider.getRoots();
+//         tree.expand(it.next());
          FooExpansion.get().expandAll();
          // Windowsデザインのテーマを使用するように設定
          tree.add(new WindowsTheme());
@@ -234,4 +253,100 @@ public class CC3030C01 extends BasePage {
     protected Component newContentComponent(String id, IModel<Foo> model){
         return content.newContentComponent(id, tree, model);
      }
+
+    /**
+     * <p>先頭項目にフォーカスを設定する</p>
+     * 
+     */
+    protected void setFocusToFirstItem(){
+
+        // ツリー部
+
+    }
+
+    /**
+     * <p>起動条件 : 初期処理時</p>
+     * <p>処理概要 : 本処理を実行する</p>
+     * 
+     * @return 初期処理の成否
+     */
+    @Override
+    protected boolean executeInit(){
+        boolean ret = false;
+
+        // --------------------------------------------------
+        // 初期処理の実行
+        // --------------------------------------------------
+
+        try{
+
+            // サービスの取得
+            CC3030S01 service = this.getService();
+
+            // 引数(OUT)の設定
+            List<CC3030S01.Result> results = new ArrayList<CC3030S01.Result>();
+
+            // サービスの実行
+            ret = service.executeInit(results);
+
+            // 実行結果の表示
+            if(!ret){
+                this.showMessage(service.getMessageModel());
+
+            }else{
+
+                // --------------------------------------------------
+                // ツリー部の設定
+                // --------------------------------------------------
+
+                this.setTreeData(results);
+                ret = true;
+            }
+
+        }catch(LogicalException e){
+
+            // エラーログ出力(システムエラー)
+            LOGGER.error("Printer Setting Search service initialization is failed. Some runtime exception happen. Please check stacktrace.", e);
+            
+            throw new IllegalStateException(e);
+        }
+
+        return ret;
+    }
+
+    /**
+     * <p>起動条件 : 初期処理時</p>
+     * <p>処理概要 : 後処理を実行する</p>
+     * 
+     * @return 初期処理における後処理の成否
+     */
+    @Override
+    protected boolean postInit(){
+
+        // --------------------------------------------------
+        // ファンクション部
+        // --------------------------------------------------
+
+        // [F02]メニュー
+        this.setFunction02Enabled(true);
+
+        // --------------------------------------------------
+        // フォーカス設定
+        // --------------------------------------------------
+
+        this.setFocusToFirstItem();
+
+        return true;
+    }
+    
+    /**
+     * <p>起動条件 : 初期処理時</p>
+     * <p>処理概要 : 検索結果をツリーに反映する。</p>
+     * 
+     * @param details 検索結果
+     */
+    @SuppressWarnings("rawtypes")
+    protected void setTreeData(List results) {
+        
+    }
 }
