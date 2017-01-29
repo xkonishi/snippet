@@ -32,7 +32,8 @@ public class HomePage extends WebPage {
 	    }
     }
 	
-	NestedTree<Foo> tree;
+//	NestedTree<Foo> tree;
+    ExDefaultNestedTree<Foo> tree;
 	SelectableFolderContent content;
 
 	public HomePage(final PageParameters parameters) {
@@ -51,7 +52,8 @@ public class HomePage extends WebPage {
 		};
 
 		//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
-		tree = new ExDefaultNestedTree<Foo>("tree", provider, new FooExpansionModel()){
+//		tree = new ExDefaultNestedTree<Foo>("tree", provider, new FooExpansionModel()){
+		tree = new ExDefaultNestedTree<Foo>("tree", provider){
 			private static final long serialVersionUID = 1L;
 			
 //			@Override
@@ -60,6 +62,7 @@ public class HomePage extends WebPage {
 ////				return HomePage.this.newContentComponent(_id, _model);
 //			}
 		};
+		tree.expandAll();
 		
 		//this.expandAll();
 		
@@ -73,7 +76,7 @@ public class HomePage extends WebPage {
 //		    	  return HomePage.this.newContentComponent(_id, _model);
 //		      }
 //		   };	
-		FooExpansion.get().expandAll();
+		//FooExpansion.get().expandAll();
    		this.add(tree);
 	}
 
