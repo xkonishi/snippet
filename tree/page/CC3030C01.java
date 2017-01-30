@@ -16,6 +16,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page.CC3030C01;
+import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page.tree.DefaultContent;
+import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page.tree.DefaultNode;
+import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page.tree.DefaultProvider;
+import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page.tree.ExDefaultNestedTree;
 import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.service.CC3030S01;
 import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.service.CC3030S01Mockup;
 import jp.co.canonits.prognerex.aptemplate_desktopaplike.CX1010.service.CX1010S01;
@@ -47,9 +51,14 @@ public class CC3030C01 extends BasePage {
     private static final long serialVersionUID = 1L;
     
     
-    NestedTree<Foo> tree;
+//    NestedTree<Foo> tree;
+//    ExDefaultNestedTree<Foo> tree;
 //    TreeContent<Foo> content;
-    SelectableFolderContent content;
+//    SelectableFolderContent content;
+    
+    private ExDefaultNestedTree tree;
+    private DefaultProvider provider;
+    private DefaultContent content;
     
     /* expandAll と collapseAll を動作させるために状態を持つ FooExpansion を返す */
     private class FooExpansionModel extends AbstractReadOnlyModel<Set<Foo>>{
@@ -173,60 +182,74 @@ public class CC3030C01 extends BasePage {
 //        });
         
         
-        FooProvider provider = new FooProvider();
-//        ExNestedTreeProvider<Foo> provider = new ExNestedTreeProvider<Foo>(){
-//
+        //FooProvider provider = new FooProvider();
+////        ExNestedTreeProvider<Foo> provider = new ExNestedTreeProvider<Foo>(){
+////
+////            private static final long serialVersionUID = 1L;
+////
+////            @Override
+////            public Iterator<Foo> getRoots(){
+////                return FooList.getList().iterator();
+////            }
+////        };
+//        tree = new NestedTree<Foo>("tree", provider, new FooExpansionModel()){
+////        tree = new NestedTree<Foo>("tree", provider){
 //            private static final long serialVersionUID = 1L;
 //
 //            @Override
-//            public Iterator<Foo> getRoots(){
-//                return FooList.getList().iterator();
+//            protected Component newContentComponent(String _id, IModel<Foo> _model){
+//               return CC3030C01.this.newContentComponent(_id, _model);
 //            }
-//        };
-        tree = new NestedTree<Foo>("tree", provider, new FooExpansionModel()){
-//        tree = new NestedTree<Foo>("tree", provider){
+//         };
+////         Iterator<Foo> it = provider.getRoots();
+////         tree.expand(it.next());
+//         FooExpansion.get().expandAll();
+        
+        provider = new DefaultProvider(DefaultNodeList.getList());
+        content = new DefaultContent(provider){
             private static final long serialVersionUID = 1L;
-
+            
             @Override
-            protected Component newContentComponent(String _id, IModel<Foo> _model){
-               return CC3030C01.this.newContentComponent(_id, _model);
+            public void onClick(DefaultNode node) {
+                String id = node.getId();
             }
-         };
-//         Iterator<Foo> it = provider.getRoots();
-//         tree.expand(it.next());
-         FooExpansion.get().expandAll();
+        };
+        tree = new ExDefaultNestedTree("tree", provider);
+        tree.expandAll();
+        
          // Windowsデザインのテーマを使用するように設定
-         tree.add(new WindowsTheme());
+         //tree.add(new WindowsTheme());
 
-//         content = new TreeContent<Foo>(){
-         content = new SelectableFolderContent(provider){
-            private static final long serialVersionUID = 1L;
-
-//            @Override
-//            public Component newContentComponent(String id, AbstractTree<Foo> tree, IModel<Foo> model){
-//                return new Folder<Foo>(id, tree, model){
-//                    private static final long serialVersionUID = 1L;
-//                    
-//                    @Override
-//                    protected MarkupContainer newLinkComponent(String _id, final IModel<Foo> _model){
-//                      Foo foo = _model.getObject();
-//                      if (tree.getProvider().hasChildren(foo)){
-//                         // ツリー node をクリックした時
-//                         return super.newLinkComponent(_id, _model);
-//                      }
-//                      // ツリー leaf をクリックした時の動作
-//                      return new AjaxLink<Foo>(_id, _model){
-//                        private static final long serialVersionUID = 1L;
+////         content = new TreeContent<Foo>(){
+//         content = new SelectableFolderContent(provider){
+//            private static final long serialVersionUID = 1L;
 //
-//                        @Override
-//                        public void onClick(AjaxRequestTarget arg0){
-//                            // TODO 自動生成されたメソッド・スタブ
-//                        }
-//                      };
-//                    }
-//                };
-//            }
-         };
+////            @Override
+////            public Component newContentComponent(String id, AbstractTree<Foo> tree, IModel<Foo> model){
+////                return new Folder<Foo>(id, tree, model){
+////                    private static final long serialVersionUID = 1L;
+////                    
+////                    @Override
+////                    protected MarkupContainer newLinkComponent(String _id, final IModel<Foo> _model){
+////                      Foo foo = _model.getObject();
+////                      if (tree.getProvider().hasChildren(foo)){
+////                         // ツリー node をクリックした時
+////                         return super.newLinkComponent(_id, _model);
+////                      }
+////                      // ツリー leaf をクリックした時の動作
+////                      return new AjaxLink<Foo>(_id, _model){
+////                        private static final long serialVersionUID = 1L;
+////
+////                        @Override
+////                        public void onClick(AjaxRequestTarget arg0){
+////                            // TODO 自動生成されたメソッド・スタブ
+////                        }
+////                      };
+////                    }
+////                };
+////            }
+//         };
+         
          
          this.pnlTree.add(tree);
          //this.pnlTree.add(new ExLabel("tree", "MMMM"));
@@ -250,9 +273,9 @@ public class CC3030C01 extends BasePage {
         this.pnlDetail.add(this.txtLabelPrinter);
     }
     
-    protected Component newContentComponent(String id, IModel<Foo> model){
-        return content.newContentComponent(id, tree, model);
-     }
+//    protected Component newContentComponent(String id, IModel<Foo> model){
+//        return content.newContentComponent(id, tree, model);
+//     }
 
     /**
      * <p>先頭項目にフォーカスを設定する</p>
