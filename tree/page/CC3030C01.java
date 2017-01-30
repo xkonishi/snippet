@@ -206,7 +206,8 @@ public class CC3030C01 extends BasePage {
 //         FooExpansion.get().expandAll();
         
         provider = new DefaultProvider(DefaultNodeList.getList());
-        content = new DefaultContent(provider){
+        content = new DefaultContent(provider);
+        tree = new ExDefaultNestedTree("tree", provider){
             private static final long serialVersionUID = 1L;
             
             @Override
@@ -214,7 +215,6 @@ public class CC3030C01 extends BasePage {
                 String id = node.getId();
             }
         };
-        tree = new ExDefaultNestedTree("tree", provider);
         tree.expandAll();
         
          // Windowsデザインのテーマを使用するように設定

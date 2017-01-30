@@ -54,12 +54,8 @@ public class DefaultContent implements IDetachable {
 
         tree.updateNode(node, targetOptional);
     }
-    
-    public void onClick(DefaultNode node) {
-        
-    }
 
-	public Component newContentComponent(String id, final AbstractTree<DefaultNode> tree, IModel<DefaultNode> model)
+	public Component newContentComponent(String id, final ExDefaultNestedTree tree, IModel<DefaultNode> model)
 	{
 		return new Folder<DefaultNode>(id, tree, model)
 		{
@@ -75,7 +71,7 @@ public class DefaultContent implements IDetachable {
             protected void onClick(AjaxRequestTarget targetOptional)
             {
             	DefaultContent.this.select(getModelObject(), tree, targetOptional);
-            	DefaultContent.this.onClick(getModelObject());
+            	tree.onClick(getModelObject());
             }
 
 			@Override

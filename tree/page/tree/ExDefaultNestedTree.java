@@ -32,6 +32,10 @@ public class ExDefaultNestedTree extends DefaultNestedTree<DefaultNode> {
 	protected Component newContentComponent(String id, IModel<DefaultNode> node) {
 		return this.content.newContentComponent(id, this, node);
 	}
+    
+    public void onClick(DefaultNode node) {
+        
+    }
 
 	public void expandAll() {
 		Iterator<DefaultNode> it = this.provider.getRoots();
