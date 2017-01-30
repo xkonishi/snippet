@@ -8,14 +8,14 @@ import org.apache.wicket.extensions.markup.html.repeater.tree.content.Folder;
 import org.apache.wicket.model.IDetachable;
 import org.apache.wicket.model.IModel;
 
-public class DefaultContent<T> implements IDetachable {
+public class DefaultContent implements IDetachable {
 	private static final long serialVersionUID = 1L;
 
-	private ITreeProvider<T> provider;
+	private ITreeProvider<DefaultNode> provider;
 
-	private IModel<T> selected;
+	private IModel<DefaultNode> selected;
 
-	public DefaultContent(ITreeProvider<T> provider)
+	public DefaultContent(ITreeProvider<DefaultNode> provider)
 	{
 		this.provider = provider;
 	}
@@ -26,9 +26,9 @@ public class DefaultContent<T> implements IDetachable {
 
 	}
 
-	protected boolean isSelected(T foo)
+	protected boolean isSelected(DefaultNode node)
 	{
-		IModel<T> model = provider.model(foo);
+		IModel<DefaultNode> model = provider.model(node);
 
 		try
 		{
@@ -40,7 +40,7 @@ public class DefaultContent<T> implements IDetachable {
 		}
 	}
 
-    protected void select(T foo, AbstractTree<T> tree, final AjaxRequestTarget targetOptional)
+    protected void select(DefaultNode node, AbstractTree<DefaultNode> tree, final AjaxRequestTarget targetOptional)
     {
         if (selected != null)
         {
@@ -50,14 +50,14 @@ public class DefaultContent<T> implements IDetachable {
             selected = null;
         }
 
-        selected = provider.model(foo);
+        selected = provider.model(node);
 
-        tree.updateNode(foo, targetOptional);
+        tree.updateNode(node, targetOptional);
     }
 
-	public Component newContentComponent(String id, final AbstractTree<T> tree, IModel<T> model)
+	public Component newContentComponent(String id, final ExDefaultNestedTree tree, IModel<DefaultNode> model)
 	{
-		return new Folder<T>(id, tree, model)
+		return new Folder<DefaultNode>(id, tree, model)
 		{
 			private static final long serialVersionUID = 1L;
 
@@ -71,6 +71,7 @@ public class DefaultContent<T> implements IDetachable {
             protected void onClick(AjaxRequestTarget targetOptional)
             {
             	DefaultContent.this.select(getModelObject(), tree, targetOptional);
+            	tree.onClick(getModelObject());
             }
 
 			@Override
@@ -81,3 +82,4 @@ public class DefaultContent<T> implements IDetachable {
 		};
 	}
 }
+
