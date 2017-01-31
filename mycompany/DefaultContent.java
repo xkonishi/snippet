@@ -71,7 +71,7 @@ public class DefaultContent implements IDetachable {
             protected void onClick(AjaxRequestTarget targetOptional)
             {
             	DefaultContent.this.select(getModelObject(), tree, targetOptional);
-            	tree.onClick(getModelObject());
+            	tree.onClick(getModelObject(),targetOptional);
             }
 
 			@Override

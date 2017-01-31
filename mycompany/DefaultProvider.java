@@ -107,7 +107,7 @@ public class DefaultProvider implements ITreeProvider<DefaultNode> {
     }
 
     
-    public void onClick(DefaultNode node) {
+    protected void onClick(DefaultNode node, AjaxRequestTarget targetOptiona) {
         
     }
 
@@ -156,7 +156,7 @@ public class DefaultProvider implements ITreeProvider<DefaultNode> {
             protected void onClick(AjaxRequestTarget targetOptional)
             {
             	DefaultProvider.this.select(getModelObject(), tree, targetOptional);
-            	DefaultProvider.this.onClick(getModelObject());
+            	DefaultProvider.this.onClick(getModelObject(), targetOptional);
             }
 
 			@Override

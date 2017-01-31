@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.markup.html.repeater.tree.DefaultNestedTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
 import org.apache.wicket.model.IModel;
@@ -34,7 +35,7 @@ public class ExDefaultNestedTree extends DefaultNestedTree<DefaultNode> {
 		return this.provider.newContentComponent(id, this, node);
 	}
     
-    public void onClick(DefaultNode node) {
+    public void onClick(DefaultNode node, AjaxRequestTarget targetOptional) {
         
     }
 
