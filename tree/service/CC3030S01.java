@@ -100,8 +100,9 @@ public class CC3030S01 extends BaseService {
       +     " , MAX(CASE WHEN PRINTERKBN = 'LP' THEN PRINTERNM END) AS LP_PRINTERNM"
       +  " FROM CCPRINTERSETTING"
       + " WHERE USERID = :USERID"
-      +   " AND IPADDRESS = :IPADDRESS";
-
+      +   " AND IPADDRESS = :IPADDRESS"
+      + " GROUP BY USERID, IPADDRESS"
+      + " ORDER BY USERID, IPADDRESS";
     // --------------------------------------------------------------------------
     // 公開クラス
     // --------------------------------------------------------------------------
