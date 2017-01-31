@@ -77,7 +77,7 @@ public class CC3030S01 extends BaseService {
     // ------------------------------------------------------
 
     /**
-     * プリンタ設定情報取得
+     * プリンタ設定情報取得（全件）
      */
     protected final String SQL_SELECT_CCPRINTERSETTING_ALL =
         "SELECT USERID"
@@ -89,6 +89,18 @@ public class CC3030S01 extends BaseService {
       + " GROUP BY USERID, IPADDRESS"
       + " ORDER BY USERID, IPADDRESS";
 
+    /**
+     * プリンタ設定情報取得
+     */
+    protected final String SQL_SELECT_CCPRINTERSETTING =
+        "SELECT USERID"
+      +     " , IPADDRESS"
+      +     " , MAX(CASE WHEN PRINTERKBN = 'CP' THEN PRINTERNM END) AS CP_PRINTERNM"
+      +     " , MAX(CASE WHEN PRINTERKBN = 'DP' THEN PRINTERNM END) AS DP_PRINTERNM"
+      +     " , MAX(CASE WHEN PRINTERKBN = 'LP' THEN PRINTERNM END) AS LP_PRINTERNM"
+      +  " FROM CCPRINTERSETTING"
+      + " WHERE USERID = :USERID"
+      +   " AND IPADDRESS = :IPADDRESS";
 
     // --------------------------------------------------------------------------
     // 公開クラス
@@ -135,6 +147,31 @@ public class CC3030S01 extends BaseService {
          * ラベル紙用プリンタ名
          */
         public String lpPrinterName;
+    }
+    
+    /**
+     * 条件部
+     * 
+     * @author Canon IT Solutions Inc. R&amp;D Center
+     * @version 2.5
+     */
+    public class Condition extends BaseServiceParameters{
+
+        /**
+         * シリアルバージョンUID
+         */
+        private static final long serialVersionUID = 1L;
+
+        /**
+         * ユーザID
+         */
+        public String userId;
+
+        /**
+         * IPアドレス
+         */
+        public String ipAddress;
+        
     }
 
     /**
@@ -210,6 +247,101 @@ public class CC3030S01 extends BaseService {
         }catch(APTemplateSQLException e){
             // エラーログ出力(システムエラー)
             LOGGER.error("Selecting CCPRINTERSETTING is failed. Some runtime exception happen on DB.", e);
+            throw e;
+            
+        }finally{
+            // データベース切断
+            try{
+                rs.close();
+            }catch(Exception e){
+            }
+            try{
+                dao.close();
+            }catch(Exception e){
+            }
+        }
+
+        // --------------------------------------------------
+        // 終了処理の実行
+        // --------------------------------------------------
+        this.finalizeService();
+
+        return ret;
+    }
+
+    /**
+     * <p>起動条件 : ツリーの末端ノード押下時</p>
+     * <p>処理概要 : 検索処理を実行する</p>
+     * 
+     * @param condition (I)条件データ
+     * @param results (O)結果データ
+     * @return 検索処理の成否
+     * @throws LogicalException 論理的例外
+     */
+    public boolean executeSearch(Condition condition, List<Result> results) throws LogicalException{
+
+        boolean ret = false;
+
+        // --------------------------------------------------
+        // 開始処理の実行
+        // --------------------------------------------------
+        try{
+            if(!this.initializeService()){
+                return false;
+            }
+        }catch(LogicalException e){
+            // エラーログ出力(システムエラー)
+            LOGGER.error("Service initialization is failed. Some runtime exception happen. Please check stacktrace.", e);
+            throw e;
+        }
+
+        // --------------------------------------------------
+        // 検索の実行
+        // --------------------------------------------------
+        APTemplateGeneralJDBCUtilDao dao = new APTemplateGeneralJDBCUtilDao();
+        SimpleResultSet rs = null;
+        try{
+            // データベース接続
+            dao.open();
+
+            // SQLの設定
+            dao.bindSQL(SQL_SELECT_CCPRINTERSETTING);
+
+            dao.clearParameters();
+            dao.setParameter("USERID", condition.userId);
+            dao.setParameter("IPADDRESS", condition.ipAddress);
+
+            // SQLの実行
+            rs = dao.executeQuery();
+            while(rs.next()){
+                Result result = new Result();
+                result.userId = rs.getString("USERID");
+                result.ipAddress = rs.getString("IPADDRESS");
+                result.cpPrinterName = rs.getString("CP_PRINTERNM");
+                result.dpPrinterName = rs.getString("DP_PRINTERNM");
+                result.lpPrinterName = rs.getString("LP_PRINTERNM");
+                results.add(result);
+            }
+            // 該当データなしの場合
+            int count = details.size();
+            if(count <= 0){
+                // メッセージ表示(該当データなし)
+                this.setMessage("CMW00001");
+                // 警告ログ出力(該当データなし)
+                LOGGER.warn("Division data and user data is not found.");
+                
+            // 正常の場合
+            }else{
+                // メッセージ表示(検索正常終了)
+                this.setMessage("CMN00004", NumberUtility.toDisplayFormat(count));
+                // ログ出力(検索正常終了)
+                LOGGER.info("Selecting division and user is success.");
+                ret = true;
+            }
+
+        }catch(APTemplateSQLException e){
+            // エラーログ出力(システムエラー)
+            LOGGER.error("Selecting division and user is failed. Some runtime exception happen on DB.", e);
             throw e;
             
         }finally{

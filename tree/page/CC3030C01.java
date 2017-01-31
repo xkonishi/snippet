@@ -4,6 +4,7 @@ import org.apache.wicket.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC2030.service.CC2030S01.Condition;
 import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page.CC3030C01;
 import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page.tree.ExDefaultNode;
 import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page.tree.ExDefaultProvider;
@@ -18,6 +19,7 @@ import jp.co.canonits.prognerex.core.presentation_wicket.component.ExFieldSet;
 import jp.co.canonits.prognerex.core.presentation_wicket.component.ExTextField;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class CC3030C01 extends BasePage {
@@ -143,7 +145,7 @@ public class CC3030C01 extends BasePage {
 
             @Override
             public void onClick(ExDefaultNode node) {
-                String label = node.getLabel();
+                CC3030C01.this.setPrinterSetting(node);
             }
         });
         this.pnlTree.add(tree);
@@ -202,7 +204,6 @@ public class CC3030C01 extends BasePage {
         // --------------------------------------------------
 
         try{
-
             // サービスの取得
             CC3030S01 service = this.getService();
 
@@ -273,5 +274,78 @@ public class CC3030C01 extends BasePage {
     protected void setTreeData(List<CC3030S01.Result> results) {
         ExDefaultProvider provider = (ExDefaultProvider)this.tree.getProvider();
         provider.setNodeList(DummyList.getList());
+        
+        List<ExDefaultNode> nodes = new ArrayList<>();
+        Iterator<CC3030S01.Result> it = results.iterator();
+        while(it.hasNext()) {
+            CC3030S01.Result r = it.next();
+            ExDefaultNode n = new ExDefaultNode(r.userId){
+                private static final long serialVersionUID = 1L;
+                public CC3030S01.Result result = r;
+            };
+            int index = nodes.indexOf(n);
+            if (index != -1) {
+                n = nodes.get(index);
+            }
+            else {
+                nodes.add(n);
+            }
+            new ExDefaultNode(n, r.ipAddress);
+        }
+        provider.setNodeList(nodes);
+    }
+    
+    protected void setPrinterSetting(ExDefaultNode node) {
+        boolean ret = false;
+
+        List<String> list = node.splitFullLabel();
+        if (list.size() == 2) {
+
+            try{
+                // サービスの取得
+                CC3030S01 service = this.getService();
+
+                // 条件(IN)の設定
+                CC3030S01.Condition condition = service.new Condition();
+                condition.userId = list.get(0);
+                condition.ipAddress = list.get(1);
+
+                // 引数(OUT)の設定
+                List<CC3030S01.Result> results = new ArrayList<CC3030S01.Result>();
+
+                // サービスの実行
+                ret = service.executeSearch(condition, results);
+
+                // 実行結果の表示
+                if(!ret){
+                    this.showMessage(service.getMessageModel());
+
+                }else{
+
+                    // --------------------------------------------------
+                    // 詳細部の設定
+                    // --------------------------------------------------
+
+                    Iterator<CC3030S01.Result> it = results.iterator();
+                    if (it.hasNext()) {
+                        CC3030S01.Result r = it.next();
+                        this.txtCutPrinter.setModelObject(r.cpPrinterName);
+                        this.txtDotPrinter.setModelObject(r.dpPrinterName);
+                        this.txtLabelPrinter.setModelObject(r.lpPrinterName);
+                    }
+                    ret = true;
+                }
+
+            }catch(LogicalException e){
+
+                // エラーログ出力(システムエラー)
+                LOGGER.error("Printer Setting Search service initialization is failed. Some runtime exception happen. Please check stacktrace.", e);
+                
+                throw new IllegalStateException(e);
+            }
+        }
+        else {
+            
+        }
     }
 }

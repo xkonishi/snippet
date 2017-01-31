@@ -35,7 +35,7 @@ public class ExDefaultNestedTree extends DefaultNestedTree<ExDefaultNode> {
         }
     }
 
-	private void setRecursive(ExDefaultNode node, Boolean expand) {
+	private void setRecursive(ExDefaultNode node, boolean expand) {
         Consumer<ExDefaultNode> c = p -> {
             if (expand) {
                 this.expand(p);
