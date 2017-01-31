@@ -323,7 +323,7 @@ public class CC3030S01 extends BaseService {
                 results.add(result);
             }
             // 該当データなしの場合
-            int count = details.size();
+            int count = results.size();
             if(count <= 0){
                 // メッセージ表示(該当データなし)
                 this.setMessage("CMW00001");
