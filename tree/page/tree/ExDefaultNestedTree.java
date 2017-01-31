@@ -1,61 +1,57 @@
 package jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page.tree;
 
 import java.util.Iterator;
-import java.util.Set;
-
+import java.util.function.Consumer;
 import org.apache.wicket.Component;
 import org.apache.wicket.extensions.markup.html.repeater.tree.DefaultNestedTree;
-import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
 import org.apache.wicket.model.IModel;
 
-public class ExDefaultNestedTree extends DefaultNestedTree<DefaultNode> {
-	private static final long serialVersionUID = 1L;
-	
-	private DefaultProvider provider;
-	public DefaultContent content;
-
-	public ExDefaultNestedTree(String id, DefaultProvider provider) {
-		super(id, provider);
-		// TODO 自動生成されたコンストラクター・スタブ
-		this.provider = provider;
-		this.content = new DefaultContent(provider);
-	}
-
-//	public ExDefaultNestedTree(String id, DefaultProvider provider, IModel<? extends Set<T>> state) {
-//		super(id, provider, state);
-//		// TODO 自動生成されたコンストラクター・スタブ
-//		this.provider = provider;
-////		this.content = new DefaultContent<T>(provider);
-//	}
-	
-	@Override
-	protected Component newContentComponent(String id, IModel<DefaultNode> node) {
-		return this.content.newContentComponent(id, this, node);
-	}
+public class ExDefaultNestedTree extends DefaultNestedTree<ExDefaultNode> {
+    private static final long serialVersionUID = 1L;
     
-    public void onClick(DefaultNode node) {
-        
+    private ExDefaultProvider provider;
+
+    public ExDefaultNestedTree(String id, ExDefaultProvider provider) {
+        super(id, provider);
+        this.provider = provider;
     }
 
-	public void expandAll() {
-		Iterator<DefaultNode> it = this.provider.getRoots();
-		while(it.hasNext()) {
-		    DefaultNode n = it.next();
-			this.expand(n);
-			if (this.provider.hasChildren(n)) {
-				this.expandChild(n);
-			}
-		}
-	}
-	
-	private void expandChild(DefaultNode node) {
-		Iterator<DefaultNode> it = this.provider.getChildren(node);
-		while(it.hasNext()) {
-		    DefaultNode n = it.next();
-			this.expand(n);
-			if (this.provider.hasChildren(n)) {
-				this.expandChild(n);
-			}
-		}
+    @Override
+    protected Component newContentComponent(String id, IModel<ExDefaultNode> node) {
+        return this.provider.newContentComponent(id, this, node);
+    }
+
+    public void expandAll() {
+        Iterator<ExDefaultNode> it = this.provider.getRoots();
+        while(it.hasNext()) {
+            this.setRecursive(it.next(), true);
+        }
+    }
+
+    public void collapseAll() {
+        Iterator<ExDefaultNode> it = this.provider.getRoots();
+        while(it.hasNext()) {
+            this.setRecursive(it.next(), false);
+        }
+    }
+
+	private void setRecursive(ExDefaultNode node, Boolean expand) {
+        Consumer<ExDefaultNode> c = p -> {
+            if (expand) {
+                this.expand(p);
+            }else{
+                this.collapse(p);
+            }
+        };
+        c.accept(node);
+
+        Iterator<ExDefaultNode> it = this.provider.getChildren(node);
+        while(it.hasNext()) {
+            ExDefaultNode n = it.next();
+            c.accept(n);
+            if (this.provider.hasChildren(n)) {
+                this.setRecursive(n, expand);
+            }
+        }
 	}
 }

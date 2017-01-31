@@ -3,49 +3,49 @@ package jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page;
 import java.util.ArrayList;
 import java.util.List;
 
-import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page.tree.DefaultNode;
+import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page.tree.ExDefaultNode;
 
 public final class DummyList extends Object{
     
-    private static List<DefaultNode> DefaultNodes = new ArrayList<>();
+    private static List<ExDefaultNode> DefaultNodes = new ArrayList<>();
     
     private DummyList() {
     }
     
-    public static List<DefaultNode> getList() {
+    public static List<ExDefaultNode> getList() {
         if (DefaultNodes.size() == 0) {
             //
-            DefaultNode DefaultNode1 = new DefaultNode("ADMIN");
+            ExDefaultNode DefaultNode1 = new ExDefaultNode("ADMIN");
             {
-                new DefaultNode(DefaultNode1, "10.70.185.24");
-                new DefaultNode(DefaultNode1, "127.0.0.1");
+                new ExDefaultNode(DefaultNode1, "10.70.185.24");
+                new ExDefaultNode(DefaultNode1, "127.0.0.1");
             }
             DefaultNodes.add(DefaultNode1);
             //
-            DefaultNode DefaultNode2 = new DefaultNode("JAVA1");
+            ExDefaultNode DefaultNode2 = new ExDefaultNode("JAVA1");
             {
-                new DefaultNode(DefaultNode2, "10.70.185.25");
+                new ExDefaultNode(DefaultNode2, "10.70.185.25");
             }
             DefaultNodes.add(DefaultNode2);
         }
         return DefaultNodes;
     }
 
-    public static DefaultNode getDefaultNode(String id)
+    public static ExDefaultNode getDefaultNode(String id)
     {
         return findDefaultNode(DefaultNodes, id);
     }
 
-    private static DefaultNode findDefaultNode(List<DefaultNode> DefaultNodes, String id)
+    private static ExDefaultNode findDefaultNode(List<ExDefaultNode> DefaultNodes, String id)
     {
-        for (DefaultNode DefaultNode : DefaultNodes)
+        for (ExDefaultNode DefaultNode : DefaultNodes)
         {
-            if (DefaultNode.getId().equals(id))
+            if (DefaultNode.getLabel().equals(id))
             {
                 return DefaultNode;
             }
 
-            DefaultNode temp = findDefaultNode(DefaultNode.getNodes(), id);
+            ExDefaultNode temp = findDefaultNode(DefaultNode.getNodes(), id);
             if (temp != null)
             {
                 return temp;

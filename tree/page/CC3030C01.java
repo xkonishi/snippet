@@ -1,42 +1,24 @@
 package jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page;
 
-import org.apache.wicket.Component;
-import org.apache.wicket.MarkupContainer;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.extensions.markup.html.repeater.tree.AbstractTree;
-import org.apache.wicket.extensions.markup.html.repeater.tree.DefaultNestedTree;
-import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
-import org.apache.wicket.extensions.markup.html.repeater.tree.content.Folder;
-import org.apache.wicket.extensions.markup.html.repeater.tree.theme.WindowsTheme;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page.CC3030C01;
-import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page.tree.DefaultContent;
-import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page.tree.DefaultNode;
-import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page.tree.DefaultProvider;
+import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page.tree.ExDefaultNode;
+import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page.tree.ExDefaultProvider;
 import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page.tree.ExDefaultNestedTree;
 import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.service.CC3030S01;
 import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.service.CC3030S01Mockup;
-import jp.co.canonits.prognerex.aptemplate_desktopaplike.CX1010.service.CX1010S01;
-import jp.co.canonits.prognerex.aptemplate_desktopaplike.CX1010.service.CX1010S01.Choices;
 import jp.co.canonits.prognerex.aptemplate_desktopaplike.dto.LoginModel;
 import jp.co.canonits.prognerex.aptemplate_desktopaplike.page.BasePage;
 import jp.co.canonits.prognerex.aptemplate_desktopaplike.session.AppSession;
 import jp.co.canonits.prognerex.core.common.exception.LogicalException;
-import jp.co.canonits.prognerex.core.presentation_wicket.component.ExDropDownItem;
 import jp.co.canonits.prognerex.core.presentation_wicket.component.ExFieldSet;
-import jp.co.canonits.prognerex.core.presentation_wicket.component.ExLabel;
 import jp.co.canonits.prognerex.core.presentation_wicket.component.ExTextField;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 public class CC3030C01 extends BasePage {
 
@@ -49,26 +31,6 @@ public class CC3030C01 extends BasePage {
      * シリアルバージョンUID
      */
     private static final long serialVersionUID = 1L;
-    
-    
-//    NestedTree<Foo> tree;
-//    ExDefaultNestedTree<Foo> tree;
-//    TreeContent<Foo> content;
-//    SelectableFolderContent content;
-    
-    private ExDefaultNestedTree tree;
-    private DefaultProvider provider;
-    private DefaultContent content;
-    
-//    /* expandAll と collapseAll を動作させるために状態を持つ FooExpansion を返す */
-//    private class FooExpansionModel extends AbstractReadOnlyModel<Set<Foo>>{
-//        private static final long serialVersionUID = 1L;
-//
-//    @Override
-//       public Set<Foo> getObject(){
-//          return FooExpansion.get();
-//       }
-//    }
 
     // -------------------------------------------------------------------------
     // 内部定数
@@ -78,10 +40,15 @@ public class CC3030C01 extends BasePage {
     // 内部変数
     // -------------------------------------------------------------------------
 
-   /**
+    /**
      * ツリー部パネル
      */
     protected ExFieldSet pnlTree;
+
+    /**
+     * ツリー
+     */
+    protected ExDefaultNestedTree tree;
 
     /**
      * 詳細部パネル
@@ -171,90 +138,15 @@ public class CC3030C01 extends BasePage {
         this.pnlTree = new ExFieldSet("pnlTree");
         this.getForm().add(this.pnlTree);
         // ツリー
-//        this.pnlTree.add(new DefaultNestedTree<Foo>("tree", new FooProvider()){
-//            private static final long serialVersionUID = 1L;
-//
-//            @Override
-//            protected Component newContentComponent(String id, IModel<Foo> node)
-//            {
-//                return super.newContentComponent(id, node);
-//            }
-//        });
-        
-        
-        //FooProvider provider = new FooProvider();
-////        ExNestedTreeProvider<Foo> provider = new ExNestedTreeProvider<Foo>(){
-////
-////            private static final long serialVersionUID = 1L;
-////
-////            @Override
-////            public Iterator<Foo> getRoots(){
-////                return FooList.getList().iterator();
-////            }
-////        };
-//        tree = new NestedTree<Foo>("tree", provider, new FooExpansionModel()){
-////        tree = new NestedTree<Foo>("tree", provider){
-//            private static final long serialVersionUID = 1L;
-//
-//            @Override
-//            protected Component newContentComponent(String _id, IModel<Foo> _model){
-//               return CC3030C01.this.newContentComponent(_id, _model);
-//            }
-//         };
-////         Iterator<Foo> it = provider.getRoots();
-////         tree.expand(it.next());
-//         FooExpansion.get().expandAll();
-        
-        provider = new DefaultProvider(DummyList.getList());
-        content = new DefaultContent(provider);
-        tree = new ExDefaultNestedTree("tree", provider){
+        tree = new ExDefaultNestedTree("tree", new ExDefaultProvider() {
             private static final long serialVersionUID = 1L;
-            
+
             @Override
-            public void onClick(DefaultNode node) {
-                String id = node.getId();
+            public void onClick(ExDefaultNode node) {
+                String label = node.getLabel();
             }
-        };
-        tree.expandAll();
-        
-         // Windowsデザインのテーマを使用するように設定
-         //tree.add(new WindowsTheme());
-
-////         content = new TreeContent<Foo>(){
-//         content = new SelectableFolderContent(provider){
-//            private static final long serialVersionUID = 1L;
-//
-////            @Override
-////            public Component newContentComponent(String id, AbstractTree<Foo> tree, IModel<Foo> model){
-////                return new Folder<Foo>(id, tree, model){
-////                    private static final long serialVersionUID = 1L;
-////                    
-////                    @Override
-////                    protected MarkupContainer newLinkComponent(String _id, final IModel<Foo> _model){
-////                      Foo foo = _model.getObject();
-////                      if (tree.getProvider().hasChildren(foo)){
-////                         // ツリー node をクリックした時
-////                         return super.newLinkComponent(_id, _model);
-////                      }
-////                      // ツリー leaf をクリックした時の動作
-////                      return new AjaxLink<Foo>(_id, _model){
-////                        private static final long serialVersionUID = 1L;
-////
-////                        @Override
-////                        public void onClick(AjaxRequestTarget arg0){
-////                            // TODO 自動生成されたメソッド・スタブ
-////                        }
-////                      };
-////                    }
-////                };
-////            }
-//         };
-         
-         
-         this.pnlTree.add(tree);
-         //this.pnlTree.add(new ExLabel("tree", "MMMM"));
-
-
+        });
+        this.pnlTree.add(tree);
          
         // --------------------------------------------------
         // 詳細部の生成
@@ -271,11 +163,19 @@ public class CC3030C01 extends BasePage {
         // ラベル用
         this.txtLabelPrinter = new ExTextField<String>("txtLabelPrinter", new Model<String>());
         this.pnlDetail.add(this.txtLabelPrinter);
+
+        // --------------------------------------------------
+        // ファンクション部のラベル設定
+        // --------------------------------------------------
+
+        this.setFunction03Label("");
+        this.setFunction04Label("");
+        this.setFunction05Label("");
+        this.setFunction06Label("");
+        this.setFunction07Label("");
+        this.setFunction08Label("");
+        this.setFunction12Label("");
     }
-    
-//    protected Component newContentComponent(String id, IModel<Foo> model){
-//        return content.newContentComponent(id, tree, model);
-//     }
 
     /**
      * <p>先頭項目にフォーカスを設定する</p>
@@ -346,6 +246,8 @@ public class CC3030C01 extends BasePage {
     @Override
     protected boolean postInit(){
 
+        this.tree.expandAll();
+
         // --------------------------------------------------
         // ファンクション部
         // --------------------------------------------------
@@ -368,8 +270,8 @@ public class CC3030C01 extends BasePage {
      * 
      * @param details 検索結果
      */
-    @SuppressWarnings("rawtypes")
-    protected void setTreeData(List results) {
-        
+    protected void setTreeData(List<CC3030S01.Result> results) {
+        ExDefaultProvider provider = (ExDefaultProvider)this.tree.getProvider();
+        provider.setNodeList(DummyList.getList());
     }
 }
