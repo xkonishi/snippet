@@ -60,15 +60,15 @@ public class CC3030C01 extends BasePage {
     private DefaultProvider provider;
     private DefaultContent content;
     
-    /* expandAll と collapseAll を動作させるために状態を持つ FooExpansion を返す */
-    private class FooExpansionModel extends AbstractReadOnlyModel<Set<Foo>>{
-        private static final long serialVersionUID = 1L;
-
-    @Override
-       public Set<Foo> getObject(){
-          return FooExpansion.get();
-       }
-    }
+//    /* expandAll と collapseAll を動作させるために状態を持つ FooExpansion を返す */
+//    private class FooExpansionModel extends AbstractReadOnlyModel<Set<Foo>>{
+//        private static final long serialVersionUID = 1L;
+//
+//    @Override
+//       public Set<Foo> getObject(){
+//          return FooExpansion.get();
+//       }
+//    }
 
     // -------------------------------------------------------------------------
     // 内部定数
@@ -205,7 +205,7 @@ public class CC3030C01 extends BasePage {
 ////         tree.expand(it.next());
 //         FooExpansion.get().expandAll();
         
-        provider = new DefaultProvider(DefaultNodeList.getList());
+        provider = new DefaultProvider(DummyList.getList());
         content = new DefaultContent(provider);
         tree = new ExDefaultNestedTree("tree", provider){
             private static final long serialVersionUID = 1L;
