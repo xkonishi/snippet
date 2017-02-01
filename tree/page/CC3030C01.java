@@ -22,6 +22,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * <p>プリンタ設定情報画面</p>
+ * 
+ * @author Canon IT Solutions Inc. R&amp;D Center
+ * @version 2.5
+ */
 public class CC3030C01 extends BasePage {
 
     /**
@@ -140,12 +146,17 @@ public class CC3030C01 extends BasePage {
         this.pnlTree = new ExFieldSet("pnlTree");
         this.getForm().add(this.pnlTree);
         // ツリー
-        tree = new ExDefaultNestedTree("tree", new ExDefaultProvider() {
+        this.tree = new ExDefaultNestedTree("tree", new ExDefaultProvider() {
             private static final long serialVersionUID = 1L;
 
             @Override
             public void onClick(ExDefaultNode node, AjaxRequestTarget targetOptional) {
-                CC3030C01.this.setPrinterSetting(node, targetOptional);
+                try {
+                    CC3030C01.this.setPrinterSetting(node, targetOptional);
+                    
+                } catch (LogicalException ex) {
+                    CC3030C01.this.showMessage("CME00000");
+                }
             }
         });
         this.pnlTree.add(tree);
@@ -222,7 +233,20 @@ public class CC3030C01 extends BasePage {
                 // ツリー部の設定
                 // --------------------------------------------------
 
-                this.setTreeData(results);
+                List<ExDefaultNode> nodes = new ArrayList<>();
+
+                String parentName = "";
+                ExDefaultNode parent = null;
+                for(CC3030S01.Result r : results) {
+                    if (r.userId.compareTo(parentName) != 0) {
+                        parentName = r.userId;
+                        parent = new ExDefaultNode(parentName);
+                        nodes.add(parent);
+                    }
+                    parent.add(new ExDefaultNode(r.ipAddress));
+                }
+                this.tree.getProvider().setNodeList(nodes);
+                
                 ret = true;
             }
 
@@ -246,6 +270,7 @@ public class CC3030C01 extends BasePage {
     @Override
     protected boolean postInit(){
 
+        // ツリーを全て展開
         this.tree.expandAll();
 
         // --------------------------------------------------
@@ -263,86 +288,51 @@ public class CC3030C01 extends BasePage {
 
         return true;
     }
-    
-    /**
-     * <p>起動条件 : 初期処理時</p>
-     * <p>処理概要 : 検索結果をツリーに反映する。</p>
-     * 
-     * @param details 検索結果
-     */
-    protected void setTreeData(final List<CC3030S01.Result> results) {
-        List<ExDefaultNode> nodes = new ArrayList<>();
 
-        String parentName = "";
-        ExDefaultNode parent = null;
-        for(CC3030S01.Result r : results) {
-            if (r.userId.compareTo(parentName) != 0) {
-                parentName = r.userId;
-                parent = new ExDefaultNode(parentName);
-                nodes.add(parent);
-            }
-            new ExDefaultNode(parent, results.indexOf(r), r.ipAddress);
-        }
+    private void setPrinterSetting(ExDefaultNode node, AjaxRequestTarget targetOptional) throws LogicalException{
 
-        ExDefaultProvider provider = (ExDefaultProvider)this.tree.getProvider();
-        provider.setNodeList(nodes);
-    }
+        // 詳細部パネルを更新対象に
+        targetOptional.add(pnlDetail);
 
-    protected void setPrinterSetting(ExDefaultNode node, AjaxRequestTarget targetOptional) {
-        boolean ret = false;
-
-        if (node.getId() != -1) {
-
-            try{
-                // サービスの取得
-                CC3030S01 service = this.getService();
-
-                // 条件(IN)の設定
-                CC3030S01.Condition condition = service.new Condition();
-                condition.userId = node.getParent().getLabel();
-                condition.ipAddress = node.getLabel();
-
-                // 引数(OUT)の設定
-                List<CC3030S01.Result> results = new ArrayList<CC3030S01.Result>();
-
-                // サービスの実行
-                ret = service.executeSearch(condition, results);
-
-                // 実行結果の表示
-                if(!ret){
-                    this.showMessage(service.getMessageModel());
-
-                }else{
-
-                    // --------------------------------------------------
-                    // 詳細部の設定
-                    // --------------------------------------------------
-
-                    Iterator<CC3030S01.Result> it = results.iterator();
-                    if (it.hasNext()) {
-                        CC3030S01.Result r = it.next();
-                        this.txtCutPrinter.setModelObject(r.cpPrinterName);
-                        this.txtDotPrinter.setModelObject(r.dpPrinterName);
-                        this.txtLabelPrinter.setModelObject(r.lpPrinterName);
-                    }
-                    ret = true;
-                }
-
-            }catch(LogicalException e){
-
-                // エラーログ出力(システムエラー)
-                LOGGER.error("Printer Setting Search service search is failed. Some runtime exception happen. Please check stacktrace.", e);
-                
-                throw new IllegalStateException(e);
-            }
-        }
-        else {
+        // 親ノードの場合
+        if (!this.tree.getProvider().hasChildren(node)) {
             this.txtCutPrinter.setModelObject("");
             this.txtDotPrinter.setModelObject("");
             this.txtLabelPrinter.setModelObject("");
+            return;
         }
-        
-        // 詳細部パネルを更新対象に
-        targetOptional.add(pnlDetail);
+
+        // 子ノードの場合
+        // サービスの取得
+        CC3030S01 service = this.getService();
+
+        // 条件(IN)の設定
+        CC3030S01.Condition condition = service.new Condition();
+        condition.userId = node.getParent().getLabel();
+        condition.ipAddress = node.getLabel();
+
+        // 引数(OUT)の設定
+        List<CC3030S01.Result> results = new ArrayList<CC3030S01.Result>();
+
+        // サービスの実行
+        boolean ret = service.executeSearch(condition, results);
+
+        // 実行結果の表示
+        if(!ret){
+            this.showMessage(service.getMessageModel());
+
+        }else{
+
+            // --------------------------------------------------
+            // 詳細部の設定
+            // --------------------------------------------------
+            Iterator<CC3030S01.Result> it = results.iterator();
+            if (it.hasNext()) {
+                CC3030S01.Result r = it.next();
+                this.txtCutPrinter.setModelObject(r.cpPrinterName);
+                this.txtDotPrinter.setModelObject(r.dpPrinterName);
+                this.txtLabelPrinter.setModelObject(r.lpPrinterName);
+            }
+        }
     }
 }

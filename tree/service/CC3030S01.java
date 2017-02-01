@@ -5,11 +5,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC1040.service.CC1040S01.Condition;
-import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC2000.service.ListService;
-import jp.co.canonits.prognerex.aptemplate_desktopaplike.CX1010.service.CX1010S01.Choices;
-import jp.co.canonits.prognerex.aptemplate_desktopaplike.CX1010.service.CX1010S01.Detail;
-import jp.co.canonits.prognerex.aptemplate_desktopaplike.constants.AppConstants;
 import jp.co.canonits.prognerex.aptemplate_desktopaplike.dao.APTemplateGeneralJDBCUtilDao;
 import jp.co.canonits.prognerex.aptemplate_desktopaplike.dao.exception.APTemplateSQLException;
 import jp.co.canonits.prognerex.aptemplate_desktopaplike.dto.BaseServiceParameters;
@@ -233,9 +228,6 @@ public class CC3030S01 extends BaseService {
                 Result result = new Result();
                 result.userId = rs.getString("USERID");
                 result.ipAddress = rs.getString("IPADDRESS");
-                result.cpPrinterName = rs.getString("CP_PRINTERNM");
-                result.dpPrinterName = rs.getString("DP_PRINTERNM");
-                result.lpPrinterName = rs.getString("LP_PRINTERNM");
                 results.add(result);
             }
 

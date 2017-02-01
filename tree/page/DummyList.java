@@ -15,18 +15,18 @@ public final class DummyList extends Object{
     public static List<ExDefaultNode> getList() {
         if (DefaultNodes.size() == 0) {
             //
-            ExDefaultNode DefaultNode1 = new ExDefaultNode("ADMIN");
-            {
-                new ExDefaultNode(DefaultNode1, "10.70.185.24");
-                new ExDefaultNode(DefaultNode1, "127.0.0.1");
-            }
-            DefaultNodes.add(DefaultNode1);
-            //
-            ExDefaultNode DefaultNode2 = new ExDefaultNode("JAVA1");
-            {
-                new ExDefaultNode(DefaultNode2, "10.70.185.25");
-            }
-            DefaultNodes.add(DefaultNode2);
+//            ExDefaultNode DefaultNode1 = new ExDefaultNode("ADMIN");
+//            {
+//                new ExDefaultNode(DefaultNode1, "10.70.185.24");
+//                new ExDefaultNode(DefaultNode1, "127.0.0.1");
+//            }
+//            DefaultNodes.add(DefaultNode1);
+//            //
+//            ExDefaultNode DefaultNode2 = new ExDefaultNode("JAVA1");
+//            {
+//                new ExDefaultNode(DefaultNode2, "10.70.185.25");
+//            }
+//            DefaultNodes.add(DefaultNode2);
         }
         return DefaultNodes;
     }
@@ -45,7 +45,7 @@ public final class DummyList extends Object{
                 return DefaultNode;
             }
 
-            ExDefaultNode temp = findDefaultNode(DefaultNode.getNodes(), id);
+            ExDefaultNode temp = findDefaultNode(DefaultNode.getChildNodes(), id);
             if (temp != null)
             {
                 return temp;
