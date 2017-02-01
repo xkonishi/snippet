@@ -2,64 +2,48 @@ package jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page.tree;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 public class ExDefaultNode implements Serializable{
     private static final long serialVersionUID = 1L;
 
-    private String label;
-    private String fulllabel;
+    private final int id;
+    private final String label;
 
     private ExDefaultNode parent;
 
     private List<ExDefaultNode> nodes = new ArrayList<>();
 
     public ExDefaultNode(String label){
-        this.label = label;
-        this.fulllabel = label;
+        this(-1, label);
+    }
+
+    public ExDefaultNode(int id, String label){
+        this(null, id, label);
     }
 
     public ExDefaultNode(ExDefaultNode parent, String label) {
-        this(label);
+        this(parent, -1, label);
+    }
 
+    public ExDefaultNode(ExDefaultNode parent, int id, String label) {
+        this.id = id;
+        this.label = label;
         this.parent = parent;
-        this.parent.nodes.add(this);
-        
-        StringBuffer buf = new StringBuffer();
-        this.setFullLabel(this, buf);
-        this.fulllabel = buf.toString();
+        if (this.parent != null) this.parent.nodes.add(this);
     }
 
-    private void setFullLabel(ExDefaultNode node, StringBuffer buf) {
-        if (buf.length() != 0) buf.insert(0, "_");
-        buf.insert(0, node.getLabel());
-        ExDefaultNode p = node.getParent();
-        if (p != null) {
-            setFullLabel(p, buf);
-        }
-    }
-
-    public ExDefaultNode getParent() {
-        return parent;
+    public int getId() {
+        return this.id;
     }
 
     public String getLabel() {
-        return label;
+        return this.label;
     }
 
-    public String getFullLabel() {
-        return this.fulllabel;
-    }
-
-    public List<String> splitFullLabel() {
-        String[] arr = this.fulllabel.split("_",0);
-        return Arrays.asList(arr);
-    }
-
-    public String getParentLabel(ExDefaultNode node) {
-        return this.getParent().getLabel();
+    public ExDefaultNode getParent() {
+        return this.parent;
     }
 
     public List<ExDefaultNode> getNodes() {
@@ -73,14 +57,10 @@ public class ExDefaultNode implements Serializable{
 
     @Override
     public boolean equals(Object obj) {
-        StringBuffer buf1 = new StringBuffer();
-        StringBuffer buf2 = new StringBuffer();
-
-        this.setFullLabel(this, buf1);
-
-        ExDefaultNode n = ((ExDefaultNode)obj);
-        n.setFullLabel(n, buf2);
-
-        return (buf1.toString().compareTo(buf2.toString()) == 0);
+        if (obj instanceof ExDefaultNode) {
+            ExDefaultNode n = ((ExDefaultNode)obj);
+            return (n.id == this.id && n.label == this.label);
+        }
+        return false;
     }
 }

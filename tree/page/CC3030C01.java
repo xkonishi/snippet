@@ -1,10 +1,10 @@
 package jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC2030.service.CC2030S01.Condition;
 import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page.CC3030C01;
 import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page.tree.ExDefaultNode;
 import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page.tree.ExDefaultProvider;
@@ -144,8 +144,8 @@ public class CC3030C01 extends BasePage {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public void onClick(ExDefaultNode node) {
-                CC3030C01.this.setPrinterSetting(node);
+            public void onClick(ExDefaultNode node, AjaxRequestTarget targetOptional) {
+                CC3030C01.this.setPrinterSetting(node, targetOptional);
             }
         });
         this.pnlTree.add(tree);
@@ -185,8 +185,7 @@ public class CC3030C01 extends BasePage {
      */
     protected void setFocusToFirstItem(){
 
-        // ツリー部
-
+        this.setFocus(this.tree);
     }
 
     /**
@@ -271,35 +270,28 @@ public class CC3030C01 extends BasePage {
      * 
      * @param details 検索結果
      */
-    protected void setTreeData(List<CC3030S01.Result> results) {
-        ExDefaultProvider provider = (ExDefaultProvider)this.tree.getProvider();
-        provider.setNodeList(DummyList.getList());
-        
+    protected void setTreeData(final List<CC3030S01.Result> results) {
         List<ExDefaultNode> nodes = new ArrayList<>();
-        Iterator<CC3030S01.Result> it = results.iterator();
-        while(it.hasNext()) {
-            CC3030S01.Result r = it.next();
-            ExDefaultNode n = new ExDefaultNode(r.userId){
-                private static final long serialVersionUID = 1L;
-                public CC3030S01.Result result = r;
-            };
-            int index = nodes.indexOf(n);
-            if (index != -1) {
-                n = nodes.get(index);
+
+        String parentName = "";
+        ExDefaultNode parent = null;
+        for(CC3030S01.Result r : results) {
+            if (r.userId.compareTo(parentName) != 0) {
+                parentName = r.userId;
+                parent = new ExDefaultNode(parentName);
+                nodes.add(parent);
             }
-            else {
-                nodes.add(n);
-            }
-            new ExDefaultNode(n, r.ipAddress);
+            new ExDefaultNode(parent, results.indexOf(r), r.ipAddress);
         }
+
+        ExDefaultProvider provider = (ExDefaultProvider)this.tree.getProvider();
         provider.setNodeList(nodes);
     }
-    
-    protected void setPrinterSetting(ExDefaultNode node) {
+
+    protected void setPrinterSetting(ExDefaultNode node, AjaxRequestTarget targetOptional) {
         boolean ret = false;
 
-        List<String> list = node.splitFullLabel();
-        if (list.size() == 2) {
+        if (node.getId() != -1) {
 
             try{
                 // サービスの取得
@@ -307,8 +299,8 @@ public class CC3030C01 extends BasePage {
 
                 // 条件(IN)の設定
                 CC3030S01.Condition condition = service.new Condition();
-                condition.userId = list.get(0);
-                condition.ipAddress = list.get(1);
+                condition.userId = node.getParent().getLabel();
+                condition.ipAddress = node.getLabel();
 
                 // 引数(OUT)の設定
                 List<CC3030S01.Result> results = new ArrayList<CC3030S01.Result>();
@@ -339,13 +331,18 @@ public class CC3030C01 extends BasePage {
             }catch(LogicalException e){
 
                 // エラーログ出力(システムエラー)
-                LOGGER.error("Printer Setting Search service initialization is failed. Some runtime exception happen. Please check stacktrace.", e);
+                LOGGER.error("Printer Setting Search service search is failed. Some runtime exception happen. Please check stacktrace.", e);
                 
                 throw new IllegalStateException(e);
             }
         }
         else {
-            
+            this.txtCutPrinter.setModelObject("");
+            this.txtDotPrinter.setModelObject("");
+            this.txtLabelPrinter.setModelObject("");
         }
+        
+        // 詳細部パネルを更新対象に
+        targetOptional.add(pnlDetail);
     }
 }

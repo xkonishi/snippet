@@ -16,7 +16,6 @@ public class ExDefaultProvider implements ITreeProvider<ExDefaultNode> {
     private static final long serialVersionUID = 1L;
     
     private List<ExDefaultNode> nodeList;
-    
     private IModel<ExDefaultNode> selected;
 
     public ExDefaultProvider() {
@@ -55,27 +54,26 @@ public class ExDefaultProvider implements ITreeProvider<ExDefaultNode> {
         this.nodeList = nodeList;
     }
 
-    public ExDefaultNode getDefaultNode(String label)
+    public ExDefaultNode getDefaultNode(int id, String label)
     {
-        return findDefaultNode(this.nodeList, label);
+        return findDefaultNode(this.nodeList, id, label);
     }
 
-    private ExDefaultNode findDefaultNode(List<ExDefaultNode> nodes, String id) {
-        for (ExDefaultNode DefaultNode : nodes) {
-            if (DefaultNode.getLabel().equals(id)) {
-                return DefaultNode;
+    private ExDefaultNode findDefaultNode(List<ExDefaultNode> nodes, int id, String label) {
+        for(ExDefaultNode n : nodes) {
+            if (n.getId() == id && n.getLabel().equals(label)) {
+                return n;
             }
 
-            ExDefaultNode temp = findDefaultNode(DefaultNode.getNodes(), id);
+            ExDefaultNode temp = findDefaultNode(n.getNodes(), id, label);
             if (temp != null) {
                 return temp;
             }
         }
-
         return null;
     }
     
-    protected void onClick(ExDefaultNode node) {
+    protected void onClick(ExDefaultNode node, AjaxRequestTarget targetOptional) {
     }
 
     public Component newContentComponent(String id, final ExDefaultNestedTree tree, IModel<ExDefaultNode> model) {
@@ -91,7 +89,7 @@ public class ExDefaultProvider implements ITreeProvider<ExDefaultNode> {
             @Override
             protected void onClick(AjaxRequestTarget targetOptional) {
                 ExDefaultProvider.this.select(getModelObject(), tree, targetOptional);
-                ExDefaultProvider.this.onClick(getModelObject());
+                ExDefaultProvider.this.onClick(getModelObject(), targetOptional);
             }
 
             @Override
@@ -104,26 +102,26 @@ public class ExDefaultProvider implements ITreeProvider<ExDefaultNode> {
     private class DefaultNodeModel extends LoadableDetachableModel<ExDefaultNode> {
         private static final long serialVersionUID = 1L;
 
+        private final int id;
         private final String label;
-        private final String fulllabel;
 
         public DefaultNodeModel(ExDefaultNode node) {
             super(node);
 
-            label = node.getLabel();
-            fulllabel = node.getFullLabel();
+            this.id = node.getId();
+            this.label = node.getLabel();
         }
 
         @Override
         protected ExDefaultNode load() {
-            return ExDefaultProvider.this.getDefaultNode(label);
+            return ExDefaultProvider.this.getDefaultNode(this.id, this.label);
         }
 
         @Override
         public boolean equals(Object obj) {
-            if (obj instanceof DefaultNodeModel)
-            {
-                return ((DefaultNodeModel)obj).fulllabel.equals(fulllabel);
+            if (obj instanceof DefaultNodeModel) {
+                DefaultNodeModel m = ((DefaultNodeModel)obj);
+                return (m.id == this.id && m.label == this.label);
             }
             return false;
         }
