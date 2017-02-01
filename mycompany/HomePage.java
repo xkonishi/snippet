@@ -17,41 +17,34 @@ public class HomePage extends WebPage {
 
 	public HomePage(final PageParameters parameters) {
 		super(parameters);
-		
-//        provider = new DefaultProvider(DefaultNodeList.getList()){
-//            private static final long serialVersionUID = 1L;
-//            
-//            @Override
-//            public void onClick(DefaultNode node) {
-//                String id = node.getId();
-//            }
-//        };
-//        //content = new DefaultContent(provider);
-//        tree = new ExDefaultNestedTree("tree", provider){
-//            private static final long serialVersionUID = 1L;
-//            
-////            @Override
-////            public void onClick(DefaultNode node) {
-////                String id = node.getId();
-////            }
-//        };
-        tree = new ExDefaultNestedTree("tree", new DefaultProvider(DefaultNodeList.getList()){
+ 		
+        this.tree = new ExDefaultNestedTree("tree", new ExDefaultProvider() {
             private static final long serialVersionUID = 1L;
-            
+
             @Override
-            public void onClick(DefaultNode node, AjaxRequestTarget targetOptional) {
-                String id = node.getId();
-                text.setModelObject(id);
-                targetOptional.add(text);
+            public void onClick(ExDefaultNode node, AjaxRequestTarget targetOptional) {
+                try {
+                	HomePage.this.setPrinterSetting(node, targetOptional);
+                    
+                } catch (LogicalException ex) {
+
+                }
             }
         });
-        tree.expandAll();
    		this.add(tree);
    		
-   		text = new TextField<String>("sampletext", new Model<String>("BBBBBBB"));
-   		text.setOutputMarkupId(true);
-   		this.add(text);
+   		this.tree.getProvider().setNodeList(DummyList.getList());
+   		this.tree.expandAll();
    		
-   		text.setModelObject("KKKKKKK");
+   		
+		
+   		this.text = new TextField<String>("sampletext", new Model<String>());
+   		this.text.setOutputMarkupId(true);
+   		this.add(text);
+	}
+	
+	private void setPrinterSetting(ExDefaultNode node, AjaxRequestTarget targetOptional) throws LogicalException{
+		targetOptional.add(this.text);
+		this.text.setModelObject(node.getId());
 	}
 }
