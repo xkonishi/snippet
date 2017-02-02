@@ -1,4 +1,4 @@
-package jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page.tree;
+package jp.co.canonits.prognerex.core.presentation_wicket.component.tree;
 
 import java.util.ArrayList;
 import java.util.Iterator;
