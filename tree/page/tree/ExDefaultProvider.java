@@ -1,4 +1,4 @@
-package jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page.tree;
+package jp.co.canonits.prognerex.core.presentation_wicket.component.tree;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -141,6 +141,35 @@ public class ExDefaultProvider implements ITreeProvider<ExDefaultNode> {
             }
         }
         return null;
+    }
+
+    /**
+     * <p>ルートノードの判定</p>
+     *
+     * @param node ノード
+     * @return true:Yes／false:No
+     */
+    public boolean isRoot(ExDefaultNode node) {
+        return (node.getParent() == null) ? true : false;
+    }
+
+    /**
+     * <p>選択ノードの取得</p>
+     *
+     * @return 選択ノード
+     */
+    public ExDefaultNode getSelectdNode() {
+        return this.selected.getObject();
+    }
+
+    /**
+     * <p>選択ノードの設定</p>
+     *
+     * @param node 選択ノード
+     * @param tree ツリー
+     */
+    public void setSelectedNode(ExDefaultNode node, ExDefaultNestedTree tree) {
+        this.select(node, tree, null);
     }
 
     /**

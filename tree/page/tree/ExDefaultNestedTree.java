@@ -1,4 +1,4 @@
-package jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page.tree;
+package jp.co.canonits.prognerex.core.presentation_wicket.component.tree;
 
 import java.util.Iterator;
 import java.util.function.Consumer;
@@ -39,7 +39,7 @@ public class ExDefaultNestedTree extends DefaultNestedTree<ExDefaultNode> {
      */
     @Override
     protected Component newContentComponent(String id, IModel<ExDefaultNode> node) {
-        return ((ExDefaultProvider)this.getProvider()).newContentComponent(id, this, node);
+        return this.getProvider().newContentComponent(id, this, node);
     }
     
     /**
@@ -57,7 +57,7 @@ public class ExDefaultNestedTree extends DefaultNestedTree<ExDefaultNode> {
      *
      */
     public void expandAll() {
-        Iterator<ExDefaultNode> it = ((ExDefaultProvider)this.getProvider()).getRoots();
+        Iterator<ExDefaultNode> it = this.getProvider().getRoots();
         while(it.hasNext()) {
             this.setRecursive(it.next(), true);
         }
@@ -68,7 +68,7 @@ public class ExDefaultNestedTree extends DefaultNestedTree<ExDefaultNode> {
      *
      */
     public void collapseAll() {
-        Iterator<ExDefaultNode> it = ((ExDefaultProvider)this.getProvider()).getRoots();
+        Iterator<ExDefaultNode> it = this.getProvider().getRoots();
         while(it.hasNext()) {
             this.setRecursive(it.next(), false);
         }
@@ -90,13 +90,13 @@ public class ExDefaultNestedTree extends DefaultNestedTree<ExDefaultNode> {
         };
         c.accept(node);
 
-        Iterator<ExDefaultNode> it = ((ExDefaultProvider)this.getProvider()).getChildren(node);
+        Iterator<ExDefaultNode> it = this.getProvider().getChildren(node);
         while(it.hasNext()) {
             ExDefaultNode n = it.next();
             c.accept(n);
-            if (((ExDefaultProvider)this.getProvider()).hasChildren(n)) {
+            if (this.getProvider().hasChildren(n)) {
                 this.setRecursive(n, expand);
             }
         }
-	}
+    }
 }

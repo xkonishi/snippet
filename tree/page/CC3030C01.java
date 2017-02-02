@@ -6,9 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page.CC3030C01;
-import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page.tree.ExDefaultNode;
-import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page.tree.ExDefaultProvider;
-import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page.tree.ExDefaultNestedTree;
 import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.service.CC3030S01;
 import jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.service.CC3030S01Mockup;
 import jp.co.canonits.prognerex.aptemplate_desktopaplike.dto.LoginModel;
@@ -17,6 +14,9 @@ import jp.co.canonits.prognerex.aptemplate_desktopaplike.session.AppSession;
 import jp.co.canonits.prognerex.core.common.exception.LogicalException;
 import jp.co.canonits.prognerex.core.presentation_wicket.component.ExFieldSet;
 import jp.co.canonits.prognerex.core.presentation_wicket.component.ExTextField;
+import jp.co.canonits.prognerex.core.presentation_wicket.component.tree.ExDefaultNestedTree;
+import jp.co.canonits.prognerex.core.presentation_wicket.component.tree.ExDefaultNode;
+import jp.co.canonits.prognerex.core.presentation_wicket.component.tree.ExDefaultProvider;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -295,7 +295,7 @@ public class CC3030C01 extends BasePage {
         targetOptional.add(pnlDetail);
 
         // 親ノードの場合
-        if (!this.tree.getProvider().hasChildren(node)) {
+        if (this.tree.getProvider().hasChildren(node)) {
             this.txtCutPrinter.setModelObject("");
             this.txtDotPrinter.setModelObject("");
             this.txtLabelPrinter.setModelObject("");
