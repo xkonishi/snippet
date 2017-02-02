@@ -6,12 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * <p>デフォルトツリーノードクラス</p>
- * 
- * @author Canon IT Solutions Inc. R&amp;D Center
- * @version 2.5
- */
 public class ExDefaultNode implements Serializable{
 
     /**
@@ -27,7 +21,7 @@ public class ExDefaultNode implements Serializable{
     /**
      * ラベル文字列
      */
-    private final String label;
+    private String label;
 
     /**
      * 親ノード
@@ -40,13 +34,29 @@ public class ExDefaultNode implements Serializable{
     private List<ExDefaultNode> nodes = new ArrayList<>();
 
     /**
+     * ユーザーオブジェクト
+     */
+    private Object userObject;
+
+    /**
      * <p>コンストラクタ</p>
      * 
      * @param label ラベル文字列
      */
     public ExDefaultNode(String label){
+        this(label, null);
+    }
+
+    /**
+     * <p>コンストラクタ</p>
+     *
+     * @param label ラベル文字列
+     * @param userObject ユーザーオブジェクト
+     */
+    public ExDefaultNode(String label, Object userObject){
         this.id = UUID.randomUUID().toString();
         this.label = label;
+        this.userObject = userObject;
     }
 
     /**
@@ -65,6 +75,15 @@ public class ExDefaultNode implements Serializable{
      */
     public String getLabel() {
         return this.label;
+    }
+
+    /**
+     * <p>ラベル文字列の設定</p>
+     *
+     * @param label ラベル文字列
+     */
+    public void setLabel(String label) {
+        this.label = label;
     }
 
     /**
@@ -102,6 +121,24 @@ public class ExDefaultNode implements Serializable{
     public void add(ExDefaultNode node){
         node.setParent(this);
         this.nodes.add(node);
+    }
+
+    /**
+     * <p>ユーザーオブジェクトの取得</p>
+     *
+     * @return ユーザーオブジェクト
+     */
+    public Object getUserObject() {
+        return this.userObject;
+    }
+
+    /**
+     * <p>ユーザーオブジェクトの設定</p>
+     *
+     * @param userObject ユーザーオブジェクト
+     */
+    public void setUserObject(Object userObject) {
+        this.userObject = userObject;
     }
 
     /**

@@ -18,7 +18,7 @@ public class ExDefaultNestedTree extends DefaultNestedTree<ExDefaultNode> {
      * <p>コンストラクタ</p>
      *
      * @param id ID
-     * @param provider
+     * @param provider 
      */
     public ExDefaultNestedTree(String id, ExDefaultProvider provider) {
         super(id, provider);
@@ -33,9 +33,9 @@ public class ExDefaultNestedTree extends DefaultNestedTree<ExDefaultNode> {
      */
     @Override
     protected Component newContentComponent(String id, IModel<ExDefaultNode> node) {
-        return ((ExDefaultProvider)this.getProvider()).newContentComponent(id, this, node);
+        return this.getProvider().newContentComponent(id, this, node);
     }
-
+    
     /**
      * <p>プロバイダーの取得</p>
      *
@@ -51,7 +51,7 @@ public class ExDefaultNestedTree extends DefaultNestedTree<ExDefaultNode> {
      *
      */
     public void expandAll() {
-        Iterator<ExDefaultNode> it = ((ExDefaultProvider)this.getProvider()).getRoots();
+        Iterator<ExDefaultNode> it = this.getProvider().getRoots();
         while(it.hasNext()) {
             this.setRecursive(it.next(), true);
         }
@@ -62,7 +62,7 @@ public class ExDefaultNestedTree extends DefaultNestedTree<ExDefaultNode> {
      *
      */
     public void collapseAll() {
-        Iterator<ExDefaultNode> it = ((ExDefaultProvider)this.getProvider()).getRoots();
+        Iterator<ExDefaultNode> it = this.getProvider().getRoots();
         while(it.hasNext()) {
             this.setRecursive(it.next(), false);
         }
@@ -74,7 +74,7 @@ public class ExDefaultNestedTree extends DefaultNestedTree<ExDefaultNode> {
      * @param node ノード
      * @param expand true:展開／false:縮小
      */
-  	private void setRecursive(ExDefaultNode node, boolean expand) {
+	private void setRecursive(ExDefaultNode node, boolean expand) {
         Consumer<ExDefaultNode> c = (p) -> {
             if (expand) {
                 this.expand(p);
@@ -84,11 +84,11 @@ public class ExDefaultNestedTree extends DefaultNestedTree<ExDefaultNode> {
         };
         c.accept(node);
 
-        Iterator<ExDefaultNode> it = ((ExDefaultProvider)this.getProvider()).getChildren(node);
+        Iterator<ExDefaultNode> it = this.getProvider().getChildren(node);
         while(it.hasNext()) {
             ExDefaultNode n = it.next();
             c.accept(n);
-            if (((ExDefaultProvider)this.getProvider()).hasChildren(n)) {
+            if (this.getProvider().hasChildren(n)) {
                 this.setRecursive(n, expand);
             }
         }
