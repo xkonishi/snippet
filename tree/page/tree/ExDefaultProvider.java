@@ -12,12 +12,6 @@ import org.apache.wicket.extensions.markup.html.repeater.tree.content.Folder;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-/**
- * <p>デフォルトツリープロバイダークラス</p>
- * 
- * @author Canon IT Solutions Inc. R&amp;D Center
- * @version 2.5
- */
 public class ExDefaultProvider implements ITreeProvider<ExDefaultNode> {
 
     /**

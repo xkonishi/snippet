@@ -22,12 +22,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-/**
- * <p>プリンタ設定情報画面</p>
- * 
- * @author Canon IT Solutions Inc. R&amp;D Center
- * @version 2.5
- */
 public class CC3030C01 extends BasePage {
 
     /**

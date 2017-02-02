@@ -6,12 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * <p>デフォルトツリーノードクラス</p>
- * 
- * @author Canon IT Solutions Inc. R&amp;D Center
- * @version 2.5
- */
 public class ExDefaultNode implements Serializable{
 
     /**
