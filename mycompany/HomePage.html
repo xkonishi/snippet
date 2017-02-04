@@ -6,7 +6,17 @@
 		<link href='http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:regular,bold' rel='stylesheet' type='text/css' />
 		<link rel="stylesheet" href="style.css" type="text/css" media="screen" title="Stylesheet" />
 		<script type="text/javascript">
+			window.onbeforeunload = function(e) {
+	            document.getElementById('mysubmit').click();
+	            var confirmationMessage = 'MMMMMMMMMMMMMM';
+	            (e || window.event).returnValue = confirmationMessage; //Gecko + IE
+	            return confirmationMessage;                            //Webkit, Safari, Chrome
+			};
 		/*
+			window.addEventListener('', function(){
+	            document.getElementById('mysubmit').click();
+			});
+		
 			window.onbeforeunload = function (e) {
 			    e = e || window.event;
 	
@@ -48,7 +58,7 @@
 	        <option value="CC">R</option>
 	        </datalist>
 	        
-	         <input type="submit" value="Send" wicket:id="mysubmit" />
+	         <input id="mysubmit" type="submit" value="Send" wicket:id="mysubmit" />
         </form>
 		
 		<div id="ft">
