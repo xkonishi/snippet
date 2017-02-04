@@ -1,10 +1,25 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:wicket="http://wicket.apache.org">
 	<head>
 		<meta charset="utf-8" />
 		<title>Apache Wicket Quickstart</title>
 		<link href='http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:regular,bold' rel='stylesheet' type='text/css' />
 		<link rel="stylesheet" href="style.css" type="text/css" media="screen" title="Stylesheet" />
+		<script type="text/javascript">
+		/*
+			window.onbeforeunload = function (e) {
+			    e = e || window.event;
+	
+			    // For IE and Firefox prior to version 4
+			    if (e) {
+			        e.returnValue = 'Sure?';
+			    }
+	
+			    // For Safari
+			    return 'Sure?';
+			};
+*/
+        </script>
 	</head>
 	<body>
 		<div id="hd">
@@ -14,7 +29,28 @@
 			</div>
 		</div>
 		<div wicket:id="tree">[tree]</div>
-		<input type="text" style="min-width: 300px" wicket:id="sampletext" />
+		
+        <form wicket:id="submitForm">
+			<input type="text" style="min-width: 300px" wicket:id="sampletext" />
+			
+
+	        <input type="text" wicket:id="sampletext2" autocomplete="on" list="mylist">
+	        <datalist id="mylist" wicket:id="mylist">
+	        <option value="AA" />
+	        <option value="BB" />
+	        <option value="CC" />
+	        </datalist>
+
+	
+	        <input type="search" name="q" autocomplete="on" list="keywords">
+	        <datalist id="keywords">
+	        <option value="AA">P</option>
+	        <option value="CC">R</option>
+	        </datalist>
+	        
+	         <input type="submit" value="Send" wicket:id="mysubmit" />
+        </form>
+		
 		<div id="ft">
 		</div>
 	</body>

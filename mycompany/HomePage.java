@@ -1,19 +1,24 @@
-package com.mycompany;
+﻿package com.mycompany;
 
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.WebPage;
+import org.apache.wicket.markup.html.form.Button;
+import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.Model;
 
 public class HomePage extends WebPage {
 	private static final long serialVersionUID = 1L;
 	
-    private ExDefaultNestedTree tree;
-//    private DefaultProvider provider;
-//    private DefaultContent content;
-    
+    private ExDefaultNestedTree tree;  
     TextField<String> text;
+    Html5TextField<String> text2;
+    Datalist<String> mylist;
 
 	public HomePage(final PageParameters parameters) {
 		super(parameters);
@@ -31,16 +36,44 @@ public class HomePage extends WebPage {
                 }
             }
         });
-   		this.add(tree);
+        this.add(tree);
    		
-   		this.tree.getProvider().setNodeList(DummyList.getList());
+		
+		Form<Object> submitForm = new Form<Object>("submitForm");
+		add(submitForm);
+
+        this.tree.getProvider().setNodeList(DummyList.getList());
    		this.tree.expandAll();
    		
    		
-		
+   
    		this.text = new TextField<String>("sampletext", new Model<String>());
    		this.text.setOutputMarkupId(true);
-   		this.add(text);
+   		submitForm.add(text);
+   		
+   		//-------------------------------------------------------------------------------------------
+   		this.text2 = new Html5TextField<String>("sampletext2", new Model<String>());
+   		submitForm.add(text2);
+   		
+   		List<String> ll = new ArrayList<String>();
+   		ll.add("XX");
+   		ll.add("YY");
+   		ll.add("ZZ");
+   		this.mylist = new Datalist<String>("mylist", new Model<String>(), ll, new MyChiceRenderer<String>());
+   		submitForm.add(mylist);
+   		//-------------------------------------------------------------------------------------------
+   		
+   		Button button = new Button("mysubmit", new Model<String>("MMM")) {
+			private static final long serialVersionUID = 1L;
+
+            @Override
+            public void onSubmit() {
+            	Html5TextField<String> t = HomePage.this.text2;
+            	String s = t.getConvertedInput();
+            }   			
+   		};
+   		submitForm.add(button);
+
 	}
 	
 	private void setPrinterSetting(ExDefaultNode node, AjaxRequestTarget targetOptional) throws LogicalException{
