@@ -10,7 +10,8 @@ public class MyChiceRenderer<T> implements IChoiceRenderer<T> {
 
 	@Override
 	public Object getDisplayValue(T object) {
-		return object.toString();
+		// TODO 自動生成されたメソッド・スタブ
+		return null;
 	}
 
 	@Override
@@ -23,12 +24,5 @@ public class MyChiceRenderer<T> implements IChoiceRenderer<T> {
 		// TODO 自動生成されたメソッド・スタブ
 		return null;
 	}
-
-//	@Override
-//	public T getObject(String id, IModel<? extends List<? extends T>> choices) {
-//		// TODO 自動生成されたメソッド・スタブ
-//		T t = (T)"";
-//		return t;
-//	}
 
 }
