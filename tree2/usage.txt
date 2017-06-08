@@ -1,7 +1,8 @@
 ﻿
 <wicket:container wicket:id="rdgrp1">
-    <td><span wicket:id="tree1"></span></td>
+    <span wicket:id="tree1"></span>
 </wicket:container>
+<input type="submit" value="Click!!" />
 
 
 //-------------------------------------------------------------------------------------------------------
