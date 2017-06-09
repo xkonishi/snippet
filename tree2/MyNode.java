@@ -4,6 +4,8 @@ import jp.co.canonits.common.component.tree.ExDefaultNode;
 
 public class MyNode extends ExDefaultNode{
 
+    private boolean checked;
+
     private String radioId;
     private String selectValue;
     private String textValue;
@@ -26,6 +28,14 @@ public class MyNode extends ExDefaultNode{
         this.radioId = radioId;
         this.selectValue = selectValue;
         this.textValue = textValue;
+    }
+
+    public boolean isChecked(){
+        return checked;
+    }
+
+    public void setChecked(boolean checked){
+        this.checked = checked;
     }
 
     public String getRadioId(){
