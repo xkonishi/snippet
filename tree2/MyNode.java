@@ -61,5 +61,4 @@ public class MyNode extends ExDefaultNode{
     public void setTextValue(String textValue){
         this.textValue = textValue;
     }
-
 }

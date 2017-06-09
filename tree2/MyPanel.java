@@ -54,7 +54,7 @@ public class MyPanel extends Panel
             @Override
             protected void onComponentTag(ComponentTag tag){
                 super.onComponentTag(tag);
-                if (MyPanel.this.node.getParent() != null){
+                if (node.getParent() != null){
                     tag.getAttributes().put("name", "radioChild");
                 }
             }
@@ -66,7 +66,8 @@ public class MyPanel extends Panel
 
                     @Override
                     protected void onEvent(AjaxRequestTarget arg0){
-                        System.out.println("onUpdate:" + MyPanel.this.node.getRadioId());
+                        ExComponentsOnExFormTestPage page = (ExComponentsOnExFormTestPage)getPage();
+                        page.setNodeSelection(node);
                     }
                 });
             }
