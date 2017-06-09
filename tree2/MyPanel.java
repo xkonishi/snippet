@@ -19,9 +19,6 @@ package jp.co.canonits.sample.component;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
-import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Radio;
 import org.apache.wicket.markup.html.form.TextField;
@@ -29,7 +26,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 
-import jp.co.canonits.common.component.ExRadio;
 import jp.co.canonits.common.component.tree.ExDefaultNode;
 
 /**
@@ -45,7 +41,7 @@ public class MyPanel extends Panel
     {
         super(id, foo);
 
-        add(new ExRadio<ExDefaultNode>("radio", new PropertyModel<>(foo, "radioId")));
+        add(new Radio<ExDefaultNode>("radio", new PropertyModel<>(foo, "radioId")));
 
         add(new DropDownChoice<>("select", new PropertyModel<>(foo, "selectValue"), SEARCH_ENGINES));
 
