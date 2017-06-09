@@ -50,10 +50,6 @@ public class MyPanel extends Panel
             @Override
             protected void onComponentTag(ComponentTag tag) {
                 super.onComponentTag(tag);
-                ExDefaultNode node = (ExDefaultNode)foo.getObject();
-                if (node.getParent() != null) {
-                    tag.getAttributes().put("name", "radioChild");
-                }
             }
         });
 

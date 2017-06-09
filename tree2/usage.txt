@@ -2,12 +2,16 @@
 <wicket:container wicket:id="rdgrp1">
     <span wicket:id="tree1"></span>
 </wicket:container>
-<input type="submit" value="Click!!" />
+<input type="button" wicket:id="mybutton" value="Click!!" />
 
 
 //-------------------------------------------------------------------------------------------------------
-ExRadioGroup rdgrp1 = new ExRadioGroup("rdgrp1", new Model("1-2"));// new PropertyModel<>(this, "selected"));
-ExDefaultNestedTree tree1 = new ExDefaultNestedTree("tree1", new ExDefaultProvider()){
+private ExRadioGroup rdgrp1;
+private ExDefaultNestedTree tree1;
+
+
+this.rdgrp1 = new ExRadioGroup("rdgrp1", new Model("1-2"));// new PropertyModel<>(this, "selected"));
+this.tree1 = new ExDefaultNestedTree("tree1", new ExDefaultProvider()){
     private static final long serialVersionUID = 1L;
 
     @Override
@@ -18,17 +22,47 @@ ExDefaultNestedTree tree1 = new ExDefaultNestedTree("tree1", new ExDefaultProvid
         return panel;
     }
 };
-rdgrp1.add(tree1);
-form.add(rdgrp1);
+this.rdgrp1.add(this.tree1);
+form.add(this.rdgrp1);
 
 MyNode root1 = new MyNode("javax","1","Google","ABC");
-root1.add(new MyNode("applet","1-1","Bing","DEF"));
+root1.add(new MyNode("applet","1-1","Google","DEF"));
 root1.add(new MyNode("swing","1-2","Google","GHI"));
-root1.getChildNodes().get(1).add(new MyNode("table","1-2-1","Baidu","JKL"));
+root1.getChildNodes().get(1).add(new MyNode("table","1-2-1","Google","JKL"));
 root1.getChildNodes().get(1).add(new MyNode("tree","1-2-2","Google","MNO"));
-ExDefaultNode root2 = new MyNode("javax2","2","Bing","PQR");
-tree1.getProvider().setNodeList(new ArrayList<>(Arrays.asList(root1,root2)));
-tree1.expandAll();
+ExDefaultNode root2 = new MyNode("javax2","2","Google","PQR");
+this.tree1.getProvider().setNodeList(new ArrayList<>(Arrays.asList(root1,root2)));
+this.tree1.expandAll();
+
+final ExAjaxButton btn = new ExAjaxButton("mybutton", form){
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    protected void onSubmit(AjaxRequestTarget target, Form<?> form){
+        test(target, form);
+    }
+};
+form.add(btn);
+
+private void test(AjaxRequestTarget target, Form<?> form){
+    Iterator<ExDefaultNode> it = this.tree1.getProvider().getRoots();
+    while(it.hasNext()) {
+        MyNode node = (MyNode)it.next();
+        this.debugprint(node);
+    }
+}
+
+private void debugprint(MyNode node){
+    String selected = (node.getRadioId() == this.rdgrp1.getModel().getObject().toString()) ? "*" : "";
+    String s = String.format("label: %s\t radio: %s\t select: %s\t text: %s",
+               node.getLabel(), node.getRadioId() + selected, node.getSelectValue(), node.getTextValue())
+    System.out.println(s);
+
+    List<ExDefaultNode> nlist = node.getChildNodes();
+    if (nlist.size() > 0) {
+        nlist.forEach(n -> ExComponentsOnExFormTestPage.this.debugprint((MyNode)n));
+    }
+}
 //-------------------------------------------------------------------------------------------------------
 
 
