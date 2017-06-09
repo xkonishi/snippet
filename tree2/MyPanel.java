@@ -29,6 +29,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 
+import jp.co.canonits.common.component.ExRadio;
 import jp.co.canonits.common.component.tree.ExDefaultNode;
 
 /**
@@ -44,32 +45,10 @@ public class MyPanel extends Panel
     {
         super(id, foo);
 
-        add(new Radio<ExDefaultNode>("radio", new PropertyModel<>(foo, "radioId")){
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected void onComponentTag(ComponentTag tag) {
-                super.onComponentTag(tag);
-            }
-        });
+        add(new ExRadio<ExDefaultNode>("radio", new PropertyModel<>(foo, "radioId")));
 
         add(new DropDownChoice<>("select", new PropertyModel<>(foo, "selectValue"), SEARCH_ENGINES));
 
-        add(new TextField<ExDefaultNode>("text", new PropertyModel<>(foo, "textValue")){
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected void onInitialize() {
-                super.onInitialize();
-                add(new AjaxFormComponentUpdatingBehavior("change"){
-                    private static final long serialVersionUID = 1L;
-
-                    @Override
-                    protected void onUpdate(AjaxRequestTarget arg0){
-
-                    }
-                });
-            }
-        });
+        add(new TextField<ExDefaultNode>("text", new PropertyModel<>(foo, "textValue")));
     }
 }
