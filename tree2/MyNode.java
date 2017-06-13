@@ -4,16 +4,16 @@ import jp.co.canonits.common.component.tree.ExDefaultNode;
 
 public class MyNode extends ExDefaultNode{
 
-    private boolean checked;
-
-    private String radioId;
-    private String selectValue;
-    private String textValue;
-
     /**
      * 
      */
     private static final long serialVersionUID = 1L;
+
+    private boolean checked;
+
+    private String radioGroup;
+    private String selectValue;
+    private String textValue;
 
     public MyNode(String label){
         super(label);
@@ -23,9 +23,9 @@ public class MyNode extends ExDefaultNode{
         super(label, userObject);
     }
 
-    public MyNode(String label, String radioId, String selectValue, String textValue){
+    public MyNode(String label, String radioGroup, String selectValue, String textValue){
         super(label);
-        this.radioId = radioId;
+        this.radioGroup = radioGroup;
         this.selectValue = selectValue;
         this.textValue = textValue;
     }
@@ -38,12 +38,12 @@ public class MyNode extends ExDefaultNode{
         this.checked = checked;
     }
 
-    public String getRadioId(){
-        return radioId;
+    public String getRadioGroup(){
+        return radioGroup;
     }
 
-    public void setRadioId(String radioId){
-        this.radioId = radioId;
+    public void setRadioGroup(String radioGroup){
+        this.radioGroup = radioGroup;
     }
 
     public String getSelectValue(){

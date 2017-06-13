@@ -21,6 +21,8 @@ import java.util.List;
 
 import org.apache.wicket.ajax.AjaxEventBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Radio;
@@ -48,15 +50,13 @@ public class MyPanel extends Panel
 
         node = (MyNode)foo.getObject();
 
-        add(new Radio<ExDefaultNode>("radio", new PropertyModel<>(foo, "radioId")){
+        add(new Radio<Object>("radio"){
             private static final long serialVersionUID = 1L;
 
             @Override
             protected void onComponentTag(ComponentTag tag){
                 super.onComponentTag(tag);
-                if (node.getParent() != null){
-                    tag.getAttributes().put("name", "radioChild");
-                }
+                tag.getAttributes().put("name", node.getRadioGroup());
             }
             @Override
             protected void onInitialize(){
@@ -66,8 +66,8 @@ public class MyPanel extends Panel
 
                     @Override
                     protected void onEvent(AjaxRequestTarget arg0){
-                        ExComponentsOnExFormTestPage page = (ExComponentsOnExFormTestPage)getPage();
-                        page.setNodeSelection(node);
+                        // イベント送信
+                        MyPanel.this.send(getPage(), Broadcast.BREADTH, node);
                     }
                 });
             }
@@ -76,5 +76,23 @@ public class MyPanel extends Panel
         add(new DropDownChoice<>("select", new PropertyModel<>(foo, "selectValue"), SEARCH_ENGINES));
 
         add(new TextField<ExDefaultNode>("text", new PropertyModel<>(foo, "textValue")));
+    }
+
+    @Override
+    public void onEvent(IEvent<?> event){
+        Object payload = event.getPayload();
+        // ラジオボタンがクリックされた場合
+        if (payload instanceof MyNode){
+            if (payload.equals(this.node)){
+                // 自分自身の場合は、チェックON
+                this.node.setChecked(true);
+            }
+            else{
+                // 自分以外で同じラジオグループの場合は、チェックOFF
+                if (((MyNode)payload).getRadioGroup() == this.node.getRadioGroup()){
+                    this.node.setChecked(false);
+                }
+            }
+        }
     }
 }
