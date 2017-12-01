@@ -12,36 +12,19 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
     /// </summary>
     public partial class FwTextBox : System.Windows.Forms.TextBox
     {
-        private string allowspace = "Both";
-        private string _format;
-
         /// <summary>
         /// 空白タイプ
         /// </summary>
         [Category("書式"), Description("入力可能なスペースの種類を設定します。"),
             TypeConverter(typeof(AllowSpace))]
-        public string AllowSpace
-        {
-            get => this.allowspace;
-            set => this.allowspace = value;
-        }
+        public string AllowSpace { get; set; } = "Both";
 
         /// <summary>
         /// 書式文字列
         /// </summary>
         [Category("書式"), Description("入力可能な文字種を指定する書式文字列を取得または設定します。"),
             Editor(typeof(FormatSettingEditor), typeof(UITypeEditor))]
-        public string Format
-        {
-            get { return this._format; }
-            set
-            {
-                this._format = value;
-
-                // 書式文字列に対応する正規表現パターンを取得する
-                this.RegexPattern = FormatSetting.GetRegexPattern(this._format);
-            }
-        }
+        public string Format { get; set; }
 
         /// <summary>
         /// 正規表現パターン
@@ -227,6 +210,20 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
 
                     this.mouseClickEnter = false;
                 }
+            }
+        }
+
+        /// <summary>
+        /// コントロールの配置（Layout）
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FwTextBox_Layout(object sender, LayoutEventArgs e)
+        {
+            // 書式文字列に対応する正規表現パターンを取得する
+            if(this.Format != null)
+            {
+                this.RegexPattern = FormatSetting.GetRegexPattern(this.Format);
             }
         }
     }
