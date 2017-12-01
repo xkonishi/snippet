@@ -105,6 +105,7 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
             if (!string.IsNullOrEmpty(this.clipboardText))
             {
                 Clipboard.SetText(this.clipboardText);
+                this.clipboardText = null;
             }
         }
 
