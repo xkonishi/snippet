@@ -1,0 +1,421 @@
+using MySolutions.PrognerTemplate.Client.Support.Controls.DesignEditor.FormatSetting;
+using MySolutions.PrognerTemplate.Client.Support.Controls.Selector;
+using System.ComponentModel;
+using System.Drawing.Design;
+using System.Text.RegularExpressions;
+using System.Windows.Forms;
+
+namespace MySolutions.PrognerTemplate.Client.Support.Controls
+{
+    /// <summary>
+    /// アプリケーションで使用するテキストボックスです
+    /// </summary>
+    public partial class FwTextBox : System.Windows.Forms.TextBox
+    {
+        /// <summary>
+        /// 空白タイプ
+        /// </summary>
+        [Category("書式"), Description("入力可能なスペースの種類を設定します。")]
+        [TypeConverter(typeof(AllowSpace))]
+        public virtual string AllowSpace { get; set; } = "Both";
+
+        /// <summary>
+        /// 書式記号
+        /// </summary>
+        [Category("書式"), Description("入力可能な文字種を指定する書式記号を取得または設定します。")]
+        [Editor(typeof(FormatSettingEditor), typeof(UITypeEditor))]
+        public virtual string Format { get; set; }
+
+        /// <summary>
+        /// 正規表現パターン
+        /// </summary>
+        [Browsable(false)]
+        public virtual string RegexPattern { get => FormatSetting.GetRegexPattern(this.Format); }
+
+        /// <summary>
+        /// テキスト選択有無
+        /// </summary>
+        [Category("動作"), Description("フォーカス時のテキスト選択有無を取得または設定します。")]
+        public bool HighlightText { get; set; } = true;
+
+        /// <summary>
+        /// クリップボード文字列
+        /// </summary>
+        private string clipboardText;
+
+        /// <summary>
+        /// マウス押下でフォーカスインしたかどうか
+        /// </summary>
+        private bool mouseClickEnter;
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        public FwTextBox()
+        {
+            InitializeComponent();
+        }
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="container"></param>
+        public FwTextBox(IContainer container)
+        {
+            container.Add(this);
+
+            InitializeComponent();
+        }
+
+        /// <summary>
+        /// ウインドウプロシージャ
+        /// </summary>
+        /// <param name="m"></param>
+        protected override void WndProc(ref Message m)
+        {
+            // WM_PASTE（Ctrl+V、Shift+Insert、右クリックメニューで貼り付け）
+            if (m.Msg == 0x0302)
+            {
+                // 変更前のクリップボード文字列を保存
+                this.clipboardText = Clipboard.GetText();
+
+                // クリップボードの文字列から入力不可文字を削除する
+                char[] cs = Clipboard.GetText().ToCharArray();
+                string text = this.GetAvailableString(cs);
+                if (string.IsNullOrEmpty(text))
+                {
+                    Clipboard.Clear();
+                }
+                else
+                {
+                    Clipboard.SetText(text);
+                }
+            }
+            base.WndProc(ref m);
+        }
+
+        /// <summary>
+        /// テキスト変更（TextChanged）
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FwTextBox_TextChanged(object sender, System.EventArgs e)
+        {
+            // 変更前のクリップボード文字列を復元
+            if (!string.IsNullOrEmpty(this.clipboardText))
+            {
+                Clipboard.SetText(this.clipboardText);
+                this.clipboardText = null;
+            }
+        }
+
+        /// <summary>
+        /// キー押下（KeyPress）
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FwTextBox_KeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
+        {
+            // バックスペース、「Ctrl+V」はチェック不要
+            if (e.KeyChar == '\b' || e.KeyChar == System.Convert.ToChar(22))
+            {
+                return;
+            }
+
+            // 入力不可文字の場合は、入力を無効とする
+            string text = this.GetAvailableString(new char[] { e.KeyChar });
+            if (string.IsNullOrEmpty(text))
+            {
+                e.Handled = true;
+            }
+        }
+
+        /// <summary>
+        /// 文字配列より入力可能な文字列を取得
+        /// </summary>
+        /// <param name="cs">文字配列</param>
+        /// <returns>入力可能な文字列</returns>
+        private string GetAvailableString(char[] cs)
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            foreach (char c in cs)
+            {
+                if (Regex.IsMatch(c.ToString(), "\\s"))
+                {
+                    if (c == System.Convert.ToChar(Keys.Space))
+                    {
+                        // 半角スペースで、空白タイプが"Narrow"または"Both"であれば入力可
+                        if ("Narrow".Equals(this.AllowSpace) || "Both".Equals(this.AllowSpace))
+                        {
+                            sb.Append(c.ToString());
+                        }
+                    }
+                    else
+                    {
+                        // 全角スペースで、空白タイプが"Wide"または"Both"であれば入力可
+                        if ("Wide".Equals(this.AllowSpace) || "Both".Equals(this.AllowSpace))
+                        {
+                            sb.Append(c.ToString());
+                        }
+
+                    }
+                }
+                else
+                {
+                    // 上記以外は、正規表現パターンに一致すれば入力可
+                    if (this.RegexPattern == null || Regex.IsMatch(c.ToString(), this.RegexPattern))
+                    {
+                        sb.Append(c.ToString());
+                    }
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// フォーカスイン（Enter）
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FwTextBox_Enter(object sender, System.EventArgs e)
+        {
+            // テキスト選択が必要な場合
+            if (this.HighlightText)
+            {
+                this.SelectAll();
+
+                // マウス押下でEnterした場合は選択状態が解除されてしまうので、MouseDownで再選択するためのフラグをONにする
+                if (Control.MouseButtons != MouseButtons.None)
+                {
+                    this.mouseClickEnter = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// マウス押下（MouseDown）
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FwTextBox_MouseDown(object sender, MouseEventArgs e)
+        {
+            // テキスト選択が必要な場合
+            if (this.HighlightText)
+            {
+                // マウス押下でEnterした場合、テキストを選択状態にする
+                if (this.mouseClickEnter)
+                {
+                    this.SelectAll();
+
+                    this.mouseClickEnter = false;
+                }
+            }
+        }
+    }
+}
+
+-----------------------------------------------------------------------------------------------------------------------------
+using System.ComponentModel;
+
+namespace MySolutions.PrognerTemplate.Client.Support.Controls.Selector
+{
+    /// <summary>
+    /// 入力可能なスペースの種類クラス（デザイナで使用する）
+    /// </summary>
+    class AllowSpace : TypeConverter
+    {
+        /// <summary>
+        /// リスト選択サポート可否設定
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// リストデータの取得
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
+        {
+            string[] values = new string[] {
+                "None",     // なし（入力不可）
+                "Narrow",   // 半角
+                "Wide",     // 全角
+                "Both"      // 半角／全角
+            };
+            return new StandardValuesCollection(values);
+        }
+    }
+}
+
+-----------------------------------------------------------------------------------------------------------------------------
+using System;
+using System.ComponentModel;
+using System.Drawing.Design;
+using System.Windows.Forms;
+
+namespace MySolutions.PrognerTemplate.Client.Support.Controls.DesignEditor.FormatSetting
+{
+    /// <summary>
+    /// 書式文字列編集クラス
+    /// </summary>
+    class FormatSettingEditor : UITypeEditor
+    {
+        /// <summary>
+        /// エディタースタイルの取得
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context)
+        {
+            return UITypeEditorEditStyle.Modal;
+        }
+
+        /// <summary>
+        /// 書式文字列の編集
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="provider"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
+        {
+            // 書式設定ダイアログの表示
+            FormatSetting d = new FormatSetting(value);
+            d.ShowDialog();
+
+            // 書式設定ダイアログでOK押下時は入力値を、キャンセル押下時は元の値を返却する
+            return (d.DialogResult == DialogResult.OK) ? d.FormatString : value;
+        }
+    }
+}
+
+-----------------------------------------------------------------------------------------------------------------------------
+using System;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
+
+namespace MySolutions.PrognerTemplate.Client.Support.Controls.DesignEditor.FormatSetting
+{
+    /// <summary>
+    /// 書式設定ダイアログクラス（デザイナで使用する）
+    /// </summary>
+    public partial class FormatSetting : Form
+    {
+        /// <summary>
+        /// 書式情報（書式文字、説明、正規表現）
+        /// </summary>
+        private static readonly string[,] FormatInfoArray = {
+            {"A", "［半角］大文字のアルファベット（A～Z）", "[A-Z]"},
+            {"Ａ", "［全角］大文字のアルファベット（Ａ～Ｚ）", "[Ａ-Ｚ]"},
+            {"a", "［半角］小文字のアルファベット（a～z）", "[a-z]"},
+            {"ａ", "［全角］小文字のアルファベット（ａ～ｚ）", "[ａ-ｚ]"},
+            {"9", "［半角］数字（0～9）", "[0-9]"},
+            {"９", "［全角］数字（０～９）", "[０-９]"},
+            {"#", @"［半角］数字と数字関連記号（0～9、+-$%\,.）", @"[0-9+$%\\,.-]"},
+            {"@", "［半角］記号", @"[!-/:-@\\[-`{-~]"}
+        };
+
+        /// <summary>
+        /// 変更前の書式文字列
+        /// </summary>
+        private string orgValue = "";
+
+        /// <summary>
+        /// 書式文字列
+        /// </summary>
+        public string FormatString
+        {
+            get => this.textBox1.Text;
+            set => this.textBox1.Text = value;
+        }
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="value">変更前の書式文字列</param>
+        public FormatSetting(object value)
+        {
+            InitializeComponent();
+
+            if(value != null)
+            {
+                this.orgValue = value.ToString();
+            }
+        }
+
+        /// <summary>
+        /// 正規表現パターンの取得
+        /// </summary>
+        /// <param name="formatString">書式文字列</param>
+        /// <returns>正規表現パターン</returns>
+        public static string GetRegexPattern(string formatString)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            if (!string.IsNullOrEmpty(formatString))
+            {
+                for (int i = 0; i < FormatInfoArray.GetLength(0); i++)
+                {
+                    // 該当する正規表現パターンを設定する
+                    if (formatString.Contains(FormatInfoArray[i, 0]))
+                    {
+                        // 複数条件は"|"で区切る
+                        if (sb.Length > 0)
+                        {
+                            sb.Append("|");
+                        }
+                        sb.Append(FormatInfoArray[i, 2]);
+                    }
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// 書式リストビューのチェックボックスON/OFF
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void listView1_ItemChecked(object sender, ItemCheckedEventArgs e)
+        {
+            this.FormatString = "";
+
+            // 書式文字列を作成
+            for (int i = 0; i < this.listView1.Items.Count; i++)
+            {
+                ListViewItem item = this.listView1.Items[i];
+                if (item.Checked)
+                {
+                    this.FormatString += item.Text;
+                }
+            }
+        }
+
+        /// <summary>
+        /// フォームロード
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FormatSetting_Load(object sender, EventArgs e)
+        {
+            // 書式一覧の作成
+            for (int i = 0; i < FormatInfoArray.GetLength(0); i++)
+            {
+                ListViewItem item = new ListViewItem(new string[] { FormatInfoArray[i, 0], FormatInfoArray[i, 1] });
+                this.listView1.Items.Add(item);
+
+                // 変更前の書式文字列よりチェックボックスを設定
+                item.Checked = this.orgValue.Contains(FormatInfoArray[i, 0]);
+            }
+        }
+    }
+}
