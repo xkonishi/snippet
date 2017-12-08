@@ -15,28 +15,28 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
         /// <summary>
         /// 空白タイプ
         /// </summary>
-        [Category("書式"), Description("入力可能なスペースの種類を設定します。"),
-            TypeConverter(typeof(AllowSpace))]
-        public string AllowSpace { get; set; } = "Both";
+        [Category("書式"), Description("入力可能なスペースの種類を設定します。")]
+        [TypeConverter(typeof(AllowSpace))]
+        public virtual string AllowSpace { get; set; } = "Both";
 
         /// <summary>
-        /// 書式文字列
+        /// 書式記号
         /// </summary>
-        [Category("書式"), Description("入力可能な文字種を指定する書式文字列を取得または設定します。"),
-            Editor(typeof(FormatSettingEditor), typeof(UITypeEditor))]
-        public string Format { get; set; }
+        [Category("書式"), Description("入力可能な文字種を指定する書式記号を取得または設定します。")]
+        [Editor(typeof(FormatSettingEditor), typeof(UITypeEditor))]
+        public virtual string Format { get; set; }
 
         /// <summary>
         /// 正規表現パターン
         /// </summary>
         [Browsable(false)]
-        public string RegexPattern { get; set; }
+        public virtual string RegexPattern { get => FormatSetting.GetRegexPattern(this.Format); }
 
         /// <summary>
         /// テキスト選択有無
         /// </summary>
         [Category("動作"), Description("フォーカス時のテキスト選択有無を取得または設定します。")]
-        public bool HighlightText { get; set; }
+        public bool HighlightText { get; set; } = true;
 
         /// <summary>
         /// クリップボード文字列
@@ -211,20 +211,6 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
 
                     this.mouseClickEnter = false;
                 }
-            }
-        }
-
-        /// <summary>
-        /// コントロールの配置（Layout）
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void FwTextBox_Layout(object sender, LayoutEventArgs e)
-        {
-            // 書式文字列に対応する正規表現パターンを取得する
-            if(this.Format != null)
-            {
-                this.RegexPattern = FormatSetting.GetRegexPattern(this.Format);
             }
         }
     }
