@@ -1,0 +1,336 @@
+using MySolutions.PrognerTemplate.Client.Support.Controls.DesignEditor;
+using MySolutions.PrognerTemplate.Client.Support.Controls.DesignEditor.FormatSetting;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.Text;
+using System.Drawing;
+using System;
+
+namespace MySolutions.PrognerTemplate.Client.Support.Controls
+{
+    /// <summary>
+    /// アプリケーションで使用する数値テキストボックスです
+    /// </summary>
+    public partial class FwNumber : FwTextBox
+    {
+        private decimal _decimalval;
+        //private string _textval;
+
+        /// <summary>
+        /// 空白タイプ（空白入力不可）
+        /// </summary>
+        [Browsable(false)]
+        public override string AllowSpace { get => "None"; }
+
+        /// <summary>
+        /// 書式記号（数字のみ入力可能）
+        /// </summary>
+        [Browsable(false)]
+        public override string Format { get => "9"; }
+
+        /// <summary>
+        /// 正規表現パターン
+        /// </summary>
+        public override string RegexPattern
+        {
+            get
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append("[");
+                // 数値
+                sb.Append("0-9");
+                // 小数点
+                if (this.DecimalPartMaxDigits > 0) { sb.Append("."); }
+                // 符号
+                switch (this.ValueSign)
+                {
+                    case "NoControl":
+                        sb.Append("+-");
+                        break;
+                    case "Positive":
+                        sb.Append("+");
+                        break;
+                    case "Negative":
+                        sb.Append("-");
+                        break;
+                }
+                sb.Append("]");
+                return sb.ToString();
+            }
+        }
+
+        /// <summary>
+        /// 桁区切り有無
+        /// </summary>
+        [Category("フィールド"), Description("整数部の桁区切り有無を取得または設定します。")]
+        public bool IntegerPartSeparator { get; set; } = true;
+
+        /// <summary>
+        /// 整数部の最大桁数
+        /// </summary>
+        [Category("フィールド"), Description("整数部の最大桁数を取得または設定します。")]
+        [Range(1, 28, ErrorMessage = @"値 '{0}' は 'IntegerPartMaxDigits' に対して有効な値ではありません。\n'IntegerPartMaxDigits' は '{1}' と '{2}' の間でなければなりません。")]
+        public int IntegerPartMaxDigits { get; set; } = 28;
+
+        /// <summary>
+        /// 整数部の最小桁数
+        /// </summary>
+        [Category("フィールド"), Description("整数部の最小桁数を取得または設定します。")]
+        [Range(0, 27, ErrorMessage = @"値 '{0}' は 'IntegerPartMinDigits' に対して有効な値ではありません。\n'IntegerPartMinDigits' は '{1}' と '{2}' の間でなければなりません。")]
+        public int IntegerPartMinDigits { get; set; } = 1;
+
+        /// <summary>
+        /// 小数部の最大桁数
+        /// </summary>
+        [Category("フィールド"), Description("小数部の最大桁数を取得または設定します。")]
+        [Range(0, 28, ErrorMessage = @"値 '{0}' は 'DecimalPartMaxDigits' に対して有効な値ではありません。\n'DecimalPartMaxDigits' は '{1}' と '{2}' の間でなければなりません。")]
+        public int DecimalPartMaxDigits { get; set; } = 27;
+
+        /// <summary>
+        /// 小数部の最小桁数
+        /// </summary>
+        [Category("フィールド"), Description("小数部の最小桁数を取得または設定します。")]
+        [Range(0, 0, ErrorMessage = @"値 '{0}' は 'DecimalPartMinDigits' に対して有効な値ではありません。\n'DecimalPartMinDigits' は '{1}' と '{2}' の間でなければなりません。")]
+        public int DecimalPartMinDigits { get; set; } = 0;
+
+        /// <summary>
+        /// 最大値
+        /// </summary>
+        [Category("値"), Description("入力可能な最大値を取得または設定します。")]
+        public decimal MaxValue { get; set; } = 9999999999999999999999999999m;
+
+        /// <summary>
+        /// 最小値
+        /// </summary>
+        [Category("値"), Description("入力可能な最小値を取得または設定します。")]
+        public decimal MinValue { get; set; } = -9999999999999999999999999999m;
+
+        /// <summary>
+        /// 数値（decimal型）
+        /// </summary>
+        [Category("値"), Description("数値をdecimal型で取得または設定します。")]
+        public decimal Value
+        {
+            get
+            {
+                return this._decimalval;
+            }
+            set
+            {
+                this._decimalval = value;
+
+                // テキストのフォーマット
+                this.formatText();
+            }
+        }
+
+        /// <summary>
+        /// 入力可能な符号
+        /// </summary>
+        [Category("値"), Description("入力可能な符号（正数、負数、両方）を取得または設定します。"), TypeConverter(typeof(ValueSign))]
+        public string ValueSign { get; set; } = "NoControl";
+
+        /// <summary>
+        /// テキスト文字列（デザイナで表示しない）
+        /// </summary>
+        [Browsable(false)]
+        public override string Text { get => base.Text; set => base.Text = value; }
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        public FwNumber()
+        {
+            InitializeComponent();
+        }
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="container"></param>
+        public FwNumber(IContainer container)
+        {
+            container.Add(this);
+
+            InitializeComponent();
+        }
+
+        /// <summary>
+        /// テキストのフォーマット
+        /// </summary>
+        /// <param name="inputText"></param>
+        private void formatText(string inputText = null)
+        {
+            int decimalPlace = 0;
+            bool isEndPeriod = false;
+
+            // テキスト入力時
+            if (inputText != null)
+            {
+                // マイナス符号は先頭に移動する
+                int index = inputText.IndexOf("-");
+                if (index > 0)
+                {
+                    inputText = "-" + inputText.Substring(0, index) + inputText.Substring(index + 1);
+                }
+
+                // decimal値の設定
+                decimal.TryParse(inputText.Replace(",", ""), out this._decimalval);
+                this._decimalval = Math.Max(Math.Min(this._decimalval, this.MaxValue), this.MinValue);
+
+                // 小数点以下の桁数
+                string[] arr = inputText.Split(separator: '.');
+                if (arr.Length > 1)
+                {
+                    decimalPlace = Math.Max(Math.Min(arr[1].Length, this.DecimalPartMaxDigits), this.DecimalPartMinDigits);
+
+                    if (decimalPlace == 0)
+                    {
+                        // 末尾にピリオドあり
+                        isEndPeriod = true;
+                    }
+                }
+
+                // テキスト文字列の設定（末尾のピリオドは残す。また、キャレットの位置を元に戻す。）
+                string format = ((this.IntegerPartSeparator) ? "N" : "F") + decimalPlace.ToString();
+                string text = this._decimalval.ToString(format) + ((isEndPeriod) ? "." : "");
+                int len1 = (text.IndexOf(".") != -1) ? text.Substring(0, text.IndexOf(".")).Length : 0;
+                int len2 = (this.Text.IndexOf(".") != -1) ? this.Text.Substring(0, this.Text.IndexOf(".")).Length : 0;
+                int pos = this.SelectionStart + (len1 - len2);
+                this.Text = text;
+                base.Select(pos, 0);
+            }
+            else
+            {
+                // 小数点以下の桁数
+                decimalPlace = Math.Max(Math.Min(decimal.GetBits(this._decimalval)[3] >> 16 & 0x00FF, this.DecimalPartMaxDigits), this.DecimalPartMinDigits);
+
+                // テキスト文字列の設定
+                string format = ((this.IntegerPartSeparator) ? "N" : "F") + decimalPlace.ToString();
+                string text = this._decimalval.ToString(format) + ((isEndPeriod) ? "." : "");
+                this.Text = text;
+            }
+
+            // 文字色の設定
+            this.ForeColor = (this._decimalval < 0) ? Color.Red : Color.Black;
+        }
+
+        /// <summary>
+        /// キー押下（KeyPress）
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FwNumber_KeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
+        {
+            int pos = this.SelectionStart;
+
+            if (e.KeyChar == '.')
+            {
+                // ピリオドが既に入力済みの場合は、入力済みのピリオドの後ろにキャレットを移動する
+                int index = this.Text.IndexOf(e.KeyChar);
+                if (index != -1)
+                {
+                    this.Select(index + 1, 0);
+                    e.Handled = true;
+                }
+            }
+            else if (e.KeyChar == '+')
+            {
+                // 負数の場合は、符号を反転させる
+                if (this.Value < 0m)
+                {
+                    this.Value = -(this.Value);
+                    this.Select(pos - 1, 0);
+                }
+                e.Handled = true;
+            }
+            else if (e.KeyChar == '-')
+            {
+                // 正数の場合は、符号を反転させる
+                if (this.Value >= 0m)
+                {
+                    this.Value = -(this.Value);
+                    this.Select(pos + 1, 0);
+                }
+                e.Handled = true;
+            }
+            else if (e.KeyChar >= '0' && e.KeyChar <= '9')
+            {
+                // 入力後の文字列を作成
+                string newText = this.Text.Insert(pos, e.KeyChar.ToString());
+                string[] arr = newText.Replace(",", "").Split(separator: '.');
+
+                // 整数部の入力可能桁数をチェック
+                if (arr[0].Length > this.IntegerPartMaxDigits)
+                {
+                    e.Handled = true;
+                }
+
+                // 小数部の入力可能桁数をチェック
+                if (arr.Length > 1 && arr[1].Length > this.DecimalPartMaxDigits)
+                {
+                    // カーソル位置が末尾でなければ、カーソル位置の数値を削除し、入力された内容で置き換える
+                    if (this.SelectionStart < this.Text.Length)
+                    {
+                        this.Text.Remove(this.SelectionStart, 1);
+                    }
+                    else
+                    {
+                        e.Handled = true;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// テキスト変更（TextChanged）
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FwNumber_TextChanged(object sender, System.EventArgs e)
+        {
+            if (this.Focused)
+            {
+                // テキストのフォーマット
+                this.formatText(this.Text);
+            }
+        }
+    }
+}
+
+-----------------------------------------------------------------------------------------------------------------------------
+using System.ComponentModel;
+
+namespace MySolutions.PrognerTemplate.Client.Support.Controls.DesignEditor
+{
+    /// <summary>
+    /// 入力可能な符号（正数、負数、両方）の種類クラス（デザイナで使用する）
+    /// </summary>
+    class ValueSign : TypeConverter
+    {
+        /// <summary>
+        /// リスト選択サポート可否設定
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// リストデータの取得
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
+        {
+            string[] values = new string[] {
+                "NoControl",    // 両方
+                "Positive",     // 正数
+                "Negative"      // 負数
+            };
+            return new StandardValuesCollection(values);
+        }
+    }
+}
