@@ -193,8 +193,8 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
                 // テキスト文字列の設定（末尾のピリオドは残す。また、キャレットの位置を元に戻す。）
                 string format = ((this.IntegerPartSeparator) ? "N" : "F") + decimalPlace.ToString();
                 string text = this._decimalval.ToString(format) + ((isEndPeriod) ? "." : "");
-                int len1 = (text.IndexOf(".") != -1) ? text.Substring(0, text.IndexOf(".")).Length : 0;
-                int len2 = (this.Text.IndexOf(".") != -1) ? this.Text.Substring(0, this.Text.IndexOf(".")).Length : 0;
+                int len1 = (text.IndexOf(".") != -1) ? text.Substring(0, text.IndexOf(".")).Length : text.Length;
+                int len2 = (this.Text.IndexOf(".") != -1) ? this.Text.Substring(0, this.Text.IndexOf(".")).Length : this.Text.Length;
                 int pos = this.SelectionStart + (len1 - len2);
                 this.Text = text;
                 base.Select(pos, 0);
