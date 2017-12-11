@@ -12,8 +12,8 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
     /// </summary>
     public partial class FwNumber : FwTextBox
     {
-        private decimal _decimalval;
-        //private string _textval;
+        private decimal _decimalval = 0m;
+        private string _valuesign = "NoControl";
 
         /// <summary>
         /// 空白タイプ（空白入力不可）
@@ -22,10 +22,10 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
         public override string AllowSpace { get => "None"; }
 
         /// <summary>
-        /// 書式記号（数字のみ入力可能）
+        /// 書式記号（未使用）
         /// </summary>
         [Browsable(false)]
-        public override string Format { get => "9"; }
+        public override string Format { get => ""; }
 
         /// <summary>
         /// 正規表現パターン
@@ -127,13 +127,49 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
         /// 入力可能な符号
         /// </summary>
         [Category("値"), Description("入力可能な符号（正数、負数、両方）を取得または設定します。"), TypeConverter(typeof(ValueSign))]
-        public string ValueSign { get; set; } = "NoControl";
+        public string ValueSign
+        {
+            get
+            {
+                return this._valuesign;
+            }
+            set
+            {
+                this._valuesign = value;
+
+                // 負数しか入力できない場合は、マイナスフラグON
+                if (this._valuesign.Equals("Negative"))
+                {
+                    this.isMinus = true;
+
+                    // テキストのフォーマット
+                    this.formatText();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 正数の表示色
+        /// </summary>
+        [Category("表示"), Description("正数の表示色を取得または設定します。")]
+        public Color PositiveColor { get; set; } = Color.Black;
+
+        /// <summary>
+        /// 負数の表示色
+        /// </summary>
+        [Category("表示"), Description("負数の表示色を取得または設定します。")]
+        public Color NegativeColor { get; set; } = Color.Red;
 
         /// <summary>
         /// テキスト文字列（デザイナで表示しない）
         /// </summary>
         [Browsable(false)]
         public override string Text { get => base.Text; set => base.Text = value; }
+
+        /// <summary>
+        /// 負数フラグ
+        /// </summary>
+        private bool isMinus = false;
 
         /// <summary>
         /// コンストラクタ
@@ -162,15 +198,20 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
         {
             int decimalPlace = 0;
             bool isEndPeriod = false;
+            string text = "";
+            int pos = this.SelectionStart;
 
-            // テキスト入力時
             if (inputText != null)
             {
+                // ------------------------
+                // テキストボックス編集時
+                // ------------------------
+
                 // マイナス符号は先頭に移動する
-                int index = inputText.IndexOf("-");
-                if (index > 0)
+                if (this.isMinus)
                 {
-                    inputText = "-" + inputText.Substring(0, index) + inputText.Substring(index + 1);
+                    inputText = inputText.Replace("-", "");
+                    inputText = $"-{inputText}";
                 }
 
                 // decimal値の設定
@@ -178,40 +219,74 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
                 this._decimalval = Math.Max(Math.Min(this._decimalval, this.MaxValue), this.MinValue);
 
                 // 小数点以下の桁数
-                string[] arr = inputText.Split(separator: '.');
+                string[] arr = inputText.Replace(",", "").Split(separator: '.');
                 if (arr.Length > 1)
                 {
                     decimalPlace = Math.Max(Math.Min(arr[1].Length, this.DecimalPartMaxDigits), this.DecimalPartMinDigits);
 
-                    if (decimalPlace == 0)
-                    {
-                        // 末尾にピリオドあり
-                        isEndPeriod = true;
-                    }
+                    // 小数点以下の桁数が０の場合、末尾はピリオド
+                    isEndPeriod = (decimalPlace == 0) ? true : false;
                 }
 
-                // テキスト文字列の設定（末尾のピリオドは残す。また、キャレットの位置を元に戻す。）
-                string format = ((this.IntegerPartSeparator) ? "N" : "F") + decimalPlace.ToString();
-                string text = this._decimalval.ToString(format) + ((isEndPeriod) ? "." : "");
-                int len1 = (text.IndexOf(".") != -1) ? text.Substring(0, text.IndexOf(".")).Length : text.Length;
-                int len2 = (this.Text.IndexOf(".") != -1) ? this.Text.Substring(0, this.Text.IndexOf(".")).Length : this.Text.Length;
-                int pos = this.SelectionStart + (len1 - len2);
-                this.Text = text;
-                base.Select(pos, 0);
+                if (!inputText.Equals(""))
+                {
+                    // テキスト文字列の設定（末尾のピリオドは残す。また、キャレットの位置を元に戻す。）
+                    string format = ((this.IntegerPartSeparator) ? "N" : "F") + decimalPlace.ToString();
+                    text = this._decimalval.ToString(format) + ((isEndPeriod) ? "." : "");
+
+                    // 負数の場合、「0」は「-0」とする
+                    if (this._decimalval == 0m && this.isMinus)
+                    {
+                        text = $"-{text}";
+                    }
+
+                    // キャレット位置の調整
+                    int len1 = (text.IndexOf(".") != -1) ? text.Substring(0, text.IndexOf(".")).Length : text.Length;
+                    int len2 = (this.Text.IndexOf(".") != -1) ? this.Text.Substring(0, this.Text.IndexOf(".")).Length : this.Text.Length;
+                    pos += (len1 - len2);
+                }
             }
             else
             {
+                // ------------------------
+                // Valueプロパティ設定時
+                // ------------------------
+
                 // 小数点以下の桁数
                 decimalPlace = Math.Max(Math.Min(decimal.GetBits(this._decimalval)[3] >> 16 & 0x00FF, this.DecimalPartMaxDigits), this.DecimalPartMinDigits);
 
                 // テキスト文字列の設定
                 string format = ((this.IntegerPartSeparator) ? "N" : "F") + decimalPlace.ToString();
-                string text = this._decimalval.ToString(format) + ((isEndPeriod) ? "." : "");
-                this.Text = text;
+                text = this._decimalval.ToString(format) + ((isEndPeriod) ? "." : "");
+
+                // 負数の場合、「0」は「-0」とする
+                if (this._decimalval == 0m && this.isMinus)
+                {
+                    text = $"-{text}";
+                }
+
+                // キャレット位置の調整
+                if (this.Text.IndexOf("-") != -1 && !this.isMinus)
+                {
+                    // 「負数→正数」は一文字前へ
+                    pos -= 1;
+                }
+                else if (this.Text.IndexOf("-") == -1 && this.isMinus)
+                {
+                    // 「正数→負数」は一文字後へ
+                    pos += 1;
+                }
             }
 
+            // テキストの更新
+            this.Text = text;
+
+            // キャレットの位置の設定（マイナス符号の前には設定しない）
+            pos = (this.isMinus && pos <= 0) ? 1 : Math.Max(pos, 0);
+            base.Select(pos, 0);
+
             // 文字色の設定
-            this.ForeColor = (this._decimalval < 0) ? Color.Red : Color.Black;
+            this.ForeColor = (this.isMinus) ? this.NegativeColor : this.PositiveColor;
         }
 
         /// <summary>
@@ -235,21 +310,23 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
             }
             else if (e.KeyChar == '+')
             {
-                // 負数の場合は、符号を反転させる
-                if (this.Value < 0m)
+                // 負数で"+"入力可能な場合
+                if (this.isMinus && this.RegexPattern.IndexOf("+") != -1)
                 {
-                    this.Value = -(this.Value);
-                    this.Select(pos - 1, 0);
+                    // 正数にする
+                    this.isMinus = false;
+                    this.Value = Math.Abs(this.Value);
                 }
                 e.Handled = true;
             }
             else if (e.KeyChar == '-')
             {
-                // 正数の場合は、符号を反転させる
-                if (this.Value >= 0m)
+                // 正数、または負数で"+"入力可能な場合
+                if (!this.isMinus || this.isMinus && this.RegexPattern.IndexOf("+") != -1)
                 {
+                    // 符号を反転させる
+                    this.isMinus = !this.isMinus;
                     this.Value = -(this.Value);
-                    this.Select(pos + 1, 0);
                 }
                 e.Handled = true;
             }
