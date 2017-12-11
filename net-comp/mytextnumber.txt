@@ -311,7 +311,7 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
             else if (e.KeyChar == '+')
             {
                 // 負数で"+"入力可能な場合
-                if (this.isMinus && this.RegexPattern.IndexOf("+") != -1)
+                if (this.isMinus && !this.ValueSign.Equals("Negative"))
                 {
                     // 正数にする
                     this.isMinus = false;
@@ -321,8 +321,9 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
             }
             else if (e.KeyChar == '-')
             {
-                // 正数、または負数で"+"入力可能な場合
-                if (!this.isMinus || this.isMinus && this.RegexPattern.IndexOf("+") != -1)
+                // 正数で"-"入力可能な場合、または負数で"+"入力可能な場合
+                if (!this.isMinus && !this.ValueSign.Equals("Positive") ||
+                    this.isMinus && !this.ValueSign.Equals("Negative"))
                 {
                     // 符号を反転させる
                     this.isMinus = !this.isMinus;
