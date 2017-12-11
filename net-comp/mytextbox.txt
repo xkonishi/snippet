@@ -33,9 +33,9 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
         public virtual string RegexPattern { get => FormatSetting.GetRegexPattern(this.Format); }
 
         /// <summary>
-        /// テキスト選択有無
+        /// テキストハイライト有無
         /// </summary>
-        [Category("動作"), Description("フォーカス時のテキスト選択有無を取得または設定します。")]
+        [Category("動作"), Description("フォーカス時のテキストハイライト有無を取得または設定します。")]
         public bool HighlightText { get; set; } = true;
 
         /// <summary>
