@@ -266,12 +266,12 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
                 }
 
                 // キャレット位置の調整
-                if (this.Text.IndexOf("-") != -1 && !this.isMinus)
+                if (this.Text.Contains("-") && !this.isMinus)
                 {
                     // 「負数→正数」は一文字前へ
                     pos -= 1;
                 }
-                else if (this.Text.IndexOf("-") == -1 && this.isMinus)
+                else if (!this.Text.Contains("-") && this.isMinus)
                 {
                     // 「正数→負数」は一文字後へ
                     pos += 1;
