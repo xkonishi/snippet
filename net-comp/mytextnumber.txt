@@ -346,12 +346,8 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
                 // 小数部の入力可能桁数をチェック
                 if (arr.Length > 1 && arr[1].Length > this.DecimalPartMaxDigits)
                 {
-                    // カーソル位置が末尾でなければ、カーソル位置の数値を削除し、入力された内容で置き換える
-                    if (this.SelectionStart < this.Text.Length)
-                    {
-                        this.Text.Remove(this.SelectionStart, 1);
-                    }
-                    else
+                    // カーソル位置が末尾であれば入力不可
+                    if (this.SelectionStart == this.Text.Length)
                     {
                         e.Handled = true;
                     }
