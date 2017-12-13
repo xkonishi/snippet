@@ -1,0 +1,176 @@
+using System;
+using System.ComponentModel;
+using System.Text.RegularExpressions;
+using System.Windows.Forms;
+
+namespace MySolutions.PrognerTemplate.Client.Support.Controls
+{
+    /// <summary>
+    /// アプリケーションで使用する日付選択コントロールです。
+    /// </summary>
+    public partial class FwDateTime : UserControl
+    {
+        /// <summary>
+        /// カスタム書式指定文字列
+        /// </summary>
+        [Category("値"), Description("日付/時刻のカスタム書式指定文字列をを取得または設定します。")]
+        public string CustomFormat
+        {
+            get
+            {
+                return this.dateTimePicker1.CustomFormat;
+            }
+            set
+            {
+                this.dateTimePicker1.CustomFormat = value;
+
+                // プレースホルダの設定
+                this.placeholder = Regex.Replace(DateTime.Now.ToString(this.CustomFormat), "[0-9]", "_");
+                this.fwTextBox1.Text = this.placeholder;
+            }
+        }
+
+        /// <summary>
+        /// 日付の最大値
+        /// </summary>
+        [Category("値"), Description("入力可能な日付の最大値を取得または設定します。")]
+        public DateTime MaxDate { get => this.dateTimePicker1.MaxDate; set => this.dateTimePicker1.MaxDate = value; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [Category("値"), Description("入力可能な日付の最小値を取得または設定します。")]
+        public DateTime MinDate { get => this.dateTimePicker1.MinDate; set => this.dateTimePicker1.MinDate = value; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [Category("値"), Description("日付/時刻の値を取得または設定します。")]
+        public DateTime Value { get => this.dateTimePicker1.Value; set => this.dateTimePicker1.Value = value; }
+
+        /// <summary>
+        /// プレースホルダ
+        /// </summary>
+        private string placeholder;
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        public FwDateTime()
+        {
+            InitializeComponent();
+        }
+
+        private void fwTextBox1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar >= '0' && e.KeyChar <= '9')
+            {
+                TextBox textbox = this.fwTextBox1;
+
+                if (textbox.SelectionStart < textbox.Text.Length)
+                {
+                    // 文字挿入位置を調整（"_"の上以外は入力不可）
+                    char c = textbox.Text[textbox.SelectionStart];
+                    if (Regex.IsMatch(c.ToString(), "[^_0-9]"))
+                    {
+                        textbox.SelectionStart = textbox.SelectionStart + 1;
+                    }
+                }
+                else
+                {
+                    e.Handled = true;
+                }
+            }
+        }
+
+        private void fwTextBox1_TextChanged(object sender, EventArgs e)
+        {
+            if (this.fwTextBox1.Focused)
+            {
+                TextBox textbox = this.fwTextBox1;
+
+                if (textbox.Text.Length > this.placeholder.Length)
+                {
+                    //----------------
+                    // 文字入力の場合
+                    //----------------
+
+                    System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+                    int index = textbox.SelectionStart;
+                    int cnt = textbox.Text.Length - this.placeholder.Length;
+
+                    string addtext = textbox.Text.Substring(index - cnt, cnt);
+                    string orgtext = textbox.Text.Remove(index - cnt, cnt);
+
+                    // 上書きモードにするため、入力された文字数分を削除した文字列を作成する（貼り付けの場合は複数文字）
+                    int skipcnt = 0;
+                    for (int i = 0; i < orgtext.Length; i++)
+                    {
+                        if (i < index - cnt)
+                        {
+                            // キャレット位置より前は変更しない
+                            sb.Append(orgtext[i]);
+                        }
+                        else
+                        {
+                            // キャレット位置から追加文字で置き換える
+                            if (cnt > 0)
+                            {
+                                if (Regex.IsMatch(orgtext[i].ToString(), "[_0-9]"))
+                                {
+                                    sb.Append(addtext[0]);
+                                    addtext = addtext.Remove(0, 1);
+                                    cnt--;
+                                }
+                                else
+                                {
+                                    sb.Append(orgtext[i]);
+                                    skipcnt++;
+                                }
+                            }
+                            else
+                            {
+                                sb.Append(orgtext[i]);
+                            }
+                        }
+                    }
+                    textbox.Text = sb.ToString();
+
+                    // キャレット位置を元に戻す
+                    textbox.Select(index + skipcnt, 0);
+                }
+                else if (textbox.Text.Length < this.placeholder.Length)
+                {
+                    //----------------
+                    // 文字削除の場合
+                    //----------------
+
+                    System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+                    int index = textbox.SelectionStart;
+                    int cnt = this.placeholder.Length - textbox.Text.Length;
+
+                    string text = textbox.Text;
+                    string deltext = this.placeholder.Substring(index, cnt);
+
+                    // 削除した位置にプレースホルダ文字列を追加する
+                    textbox.Text = text.Insert(index, deltext);
+
+                    // キャレット位置を元に戻す
+                    textbox.Select(index, 0);
+                }
+            }
+        }
+
+        private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
+        {
+           // this.fwTextBox1.Text = this.dateTimePicker1.Value.ToString(this.dateTimePicker1.CustomFormat);
+        }
+
+        private void dateTimePicker1_CloseUp(object sender, EventArgs e)
+        {
+            this.fwTextBox1.Text = this.dateTimePicker1.Value.ToString(this.dateTimePicker1.CustomFormat);
+        }
+    }
+}
