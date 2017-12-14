@@ -39,7 +39,13 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
         public bool HighlightText { get; set; } = true;
 
         /// <summary>
-        /// クリップボード文字列
+        /// 入力不可文字を除き、実際に貼り付けた文字列
+        /// </summary>
+        [Browsable(false)]
+        public string PastedText { get; set; }
+
+        /// <summary>
+        /// クリップボード文字列（クリップボード復元用）
         /// </summary>
         private string clipboardText;
 
@@ -84,14 +90,14 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
 
                 // クリップボードの文字列から入力不可文字を削除する
                 char[] cs = str.ToCharArray();
-                string text = this.GetAvailableString(cs);
-                if (string.IsNullOrEmpty(text))
+                this.PastedText = this.GetAvailableString(cs);
+                if (string.IsNullOrEmpty(this.PastedText))
                 {
                     Clipboard.Clear();
                 }
                 else
                 {
-                    Clipboard.SetText(text);
+                    Clipboard.SetText(this.PastedText);
                 }
             }
             base.WndProc(ref m);
@@ -119,8 +125,11 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
         /// <param name="e"></param>
         private void FwTextBox_KeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
         {
-            // バックスペース、「Ctrl+V」はチェック不要
-            if (e.KeyChar == '\b' || e.KeyChar == System.Convert.ToChar(22))
+            // バックスペース、Ctrl+C, Ctrl+V, Ctrl+X はチェック不要
+            if (e.KeyChar == '\b' || 
+                e.KeyChar == System.Convert.ToChar(3) || 
+                e.KeyChar == System.Convert.ToChar(22) || 
+                e.KeyChar == System.Convert.ToChar(24))
             {
                 return;
             }
@@ -195,15 +204,18 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
         /// <returns></returns>
         private string ConvertString(string target)
         {
-            if (this.Format.Contains("A") && !this.Format.Contains("a"))
+            if (this.Format != null)
             {
-                // 半角英字で大文字のみ入力可能な場合、小文字を大文字に変換する
-                return target.ToUpper();
-            }
-            else if (!this.Format.Contains("A") && this.Format.Contains("a"))
-            {
-                // 半角英字で小文字のみ入力可能な場合、大文字を小文字に変換する
-                return target.ToLower();
+                if (this.Format.Contains("A") && !this.Format.Contains("a"))
+                {
+                    // 半角英字で大文字のみ入力可能な場合、小文字を大文字に変換する
+                    return target.ToUpper();
+                }
+                else if (!this.Format.Contains("A") && this.Format.Contains("a"))
+                {
+                    // 半角英字で小文字のみ入力可能な場合、大文字を小文字に変換する
+                    return target.ToLower();
+                }
             }
             return target;
         }
