@@ -69,6 +69,15 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
         }
 
         /// <summary>
+        /// 日付文字列
+        /// </summary>
+        [Browsable(false)]
+        public override string Text
+        {
+            get => (this.fwTextBox1.Text.Equals(this.placeholder)) ? "" : this.fwTextBox1.Text;
+            set => this.fwTextBox1.Text = value;
+        }
+        /// <summary>
         /// プレースホルダ
         /// </summary>
         private string placeholder;
@@ -180,9 +189,8 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
                             text = this.MaxDate.ToString(this.CustomFormat);
                         }
                         this.Value = dt;
-
-                        this.errorprovider.SetError(this, null);
                     }
+                    this.errorprovider.SetError(this, null);
                 }
                 catch (Exception)
                 {
@@ -202,7 +210,7 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
             }
 
             // 日付文字列の設定
-            this.fwTextBox1.Text = text;
+            this.Text = text;
 
             // キャレットの位置の設定
             this.fwTextBox1.Select(pos, 0);
@@ -256,7 +264,7 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
             if (this.fwTextBox1.Focused)
             {
                 // テキストのフォーマット
-                this.FormatText(this.fwTextBox1.Text);
+                this.FormatText(this.Text);
             }
         }
     }
