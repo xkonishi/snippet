@@ -1,0 +1,525 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Text.RegularExpressions;
+using System.Windows.Forms;
+
+namespace WindowsFormsApp4
+{
+    /// <summary>
+    /// アプリケーションで使用する日付選択コントロールです。
+    /// </summary>
+    public partial class FwDateTime : UserControl
+    {
+        private DateTime? _value;
+
+        private class FieldInfo
+        {
+            public string separator;
+            public int index;
+            public int length;
+            public string format;
+
+            public FieldInfo(string separator, int index, int length, string format)
+            {
+                this.format = format;
+                this.separator = separator;
+                this.index = index;
+                this.length = length;
+            }
+
+            public int getPosition()
+            {
+                return this.index + this.length;
+            }
+        }
+
+        private List<FieldInfo> fieldInfoList = new List<FieldInfo>();
+
+        private FieldInfo currentFieldInfo;
+
+        private int currentPosition;
+
+        /// <summary>
+        /// カスタム書式指定文字列
+        /// </summary>
+        [Category("値"), Description("日付/時刻のカスタム書式指定文字列をを取得または設定します。")]
+        public string CustomFormat
+        {
+            get
+            {
+                return this.dateTimePicker1.CustomFormat;
+            }
+            set
+            {
+                this.dateTimePicker1.CustomFormat = value;
+
+                // プレースホルダの設定
+                this.placeholder = Regex.Replace(DateTime.Now.ToString(this.CustomFormat), "[0-9]", "_");
+
+                // 
+                Match m1 = Regex.Match(this.placeholder, "[_]+");
+                Match m2 = Regex.Match(this.placeholder, "[^_]+");
+                while (m1.Success)
+                {
+                    string separator = (this.fieldInfoList.Count > 0 && m2.Success) ? m2.Value : "";
+                    int index = m1.Index;
+                    int length = m1.Length;
+                    string format = this.CustomFormat.Substring(index, length);
+
+                    FieldInfo finfo = new FieldInfo(separator, index, length, format);
+                    this.fieldInfoList.Add(finfo);
+
+                    m1 = m1.NextMatch();
+                    m2 = m2.NextMatch();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 日付の最大値
+        /// </summary>
+        [Category("値"), Description("入力可能な日付の最大値を取得または設定します。")]
+        public DateTime MaxDate { get => this.dateTimePicker1.MaxDate; set => this.dateTimePicker1.MaxDate = value; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [Category("値"), Description("入力可能な日付の最小値を取得または設定します。")]
+        public DateTime MinDate { get => this.dateTimePicker1.MinDate; set => this.dateTimePicker1.MinDate = value; }
+
+        /// <summary>
+        /// 日付/時刻の値
+        /// </summary>
+        [Category("値"), Description("日付/時刻の値を取得または設定します。")]
+        public DateTime? Value
+        {
+            get
+            {
+                return this._value;
+            }
+            set
+            {
+                this._value = value;
+
+                // テキスト変更の場合は、DateTimePickerのValueを更新する
+                if (this._value.HasValue && !this._value.Equals(this.dateTimePicker1.Value))
+                {
+                    this.dateTimePicker1.Value = (DateTime)value;
+                }
+
+                // テキストのフォーマット
+                this.FormatText();
+            }
+        }
+
+        /// <summary>
+        /// 日付文字列
+        /// </summary>
+        [Browsable(false)]
+        public override string Text
+        {
+            get => (this.fwTextBox1.Text.Equals(this.placeholder)) ? "" : this.fwTextBox1.Text;
+            set => this.fwTextBox1.Text = value;
+        }
+        private List<FieldInfo> FieldInfoList { get => fieldInfoList; set => fieldInfoList = value; }
+
+        /// <summary>
+        /// プレースホルダ
+        /// </summary>
+        private string placeholder;
+
+        /// <summary>
+        /// エラープロバイダー
+        /// </summary>
+        private ErrorProvider errorprovider = new ErrorProvider();
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        public FwDateTime()
+        {
+            InitializeComponent();
+        }
+
+        /// <summary>
+        /// テキストのフォーマット
+        /// </summary>
+        /// <param name="inputText"></param>
+        private void FormatText(string inputText = null)
+        {
+            string text = "";
+            int pos = this.fwTextBox1.SelectionStart;
+
+            if (inputText != null)
+            {
+                // ------------------------
+                // テキストボックス編集時
+                // ------------------------
+
+                if (!string.IsNullOrEmpty(this.fwTextBox1.PastedText))
+                {
+                    // ---------------
+                    // 貼り付けの場合
+                    // ---------------
+
+                    // 貼り付け文字の前は変更しない
+                    text = inputText.Substring(0, pos - this.fwTextBox1.PastedText.Length);
+
+                    // 後ろに貼り付け文字を加える（区切り文字の位置を考慮する）
+                    for (int i = text.Length; i < this.placeholder.Length; i++)
+                    {
+                        if (Regex.IsMatch(this.placeholder[i].ToString(), "[_]"))
+                        {
+                            if (this.fwTextBox1.PastedText.Length > 0)
+                            {
+                                text += this.fwTextBox1.PastedText[0];
+                                this.fwTextBox1.PastedText = this.fwTextBox1.PastedText.Remove(0, 1);
+                            }
+                            else
+                            {
+                                text += this.placeholder[i];
+                            }
+                        }
+                        else
+                        {
+                            text += this.placeholder[i];
+
+                            // 貼り付け文字がまだ残っている場合はキャレット位置を後ろにずらす
+                            if (this.fwTextBox1.PastedText.Length > 0)
+                            {
+                                pos++;
+                            }
+                        }
+                    }
+
+                    this.fwTextBox1.PastedText = null;
+                }
+                else
+                {
+                    // ---------------
+                    // キー入力の場合
+                    // ---------------
+
+                    int cnt = inputText.Length - this.placeholder.Length;
+                    if (cnt > 0)
+                    {
+                        // 上書きモードにするため、入力された文字数分を削除する
+                        //text = inputText.Substring(0, pos) + inputText.Substring(pos + cnt);
+                        for (int i = this.currentFieldInfo.index; i < this.currentFieldInfo.index + cnt; i++)
+                        {
+                            if (inputText[i].Equals('_'))
+                            {
+                                text = inputText.Remove(i, 1);
+                            }
+                            if (!text.Substring(this.currentFieldInfo.index, this.currentFieldInfo.length).Contains("_"))
+                            {
+                                this.currentPosition = this.SetNextField();
+                            }
+                        }
+                    }
+                    else if (cnt < 0)
+                    {
+                        // 削除された文字は、プレースホルダで埋める
+                        text = inputText.Substring(0, pos) + this.placeholder.Substring(pos, -cnt) + inputText.Substring(pos);
+                    }
+                    else
+                    {
+                        text = inputText;
+                    }
+                }
+
+                // 有効な日付の場合は、日付/時刻の値を更新する
+                //try
+                //{
+                //    if (!text.Contains("_"))
+                //    {
+                //        DateTime dt = DateTime.ParseExact(text, this.CustomFormat, null);
+
+                //        if (dt < this.MinDate)
+                //        {
+                //            dt = this.MinDate;
+                //            text = this.MinDate.ToString(this.CustomFormat);
+                //        }
+                //        if (dt > this.MaxDate)
+                //        {
+                //            dt = this.MaxDate;
+                //            text = this.MaxDate.ToString(this.CustomFormat);
+                //        }
+                //        this.Value = dt;
+                //    }
+                //    this.errorprovider.SetError(this, null);
+                //}
+                //catch (Exception)
+                //{
+                //    this.errorprovider.SetError(this, "有効な日付を入力してください。");
+                //}
+            }
+            else
+            {
+                // ------------------------
+                // Valueプロパティ設定時
+                // ------------------------
+
+                text = (this.Value.HasValue) ? ((DateTime)this.Value).ToString(this.CustomFormat) : this.placeholder;
+
+                // テキストボックスにフォーカス移動
+                this.fwTextBox1.Focus();
+            }
+
+            // 日付文字列の設定
+            this.Text = text;
+
+            // キャレットの位置の設定
+            //this.fwTextBox1.Select(pos, 0);
+            this.fwTextBox1.SelectionStart = this.currentPosition;
+        }
+
+        private int SetNextField()
+        {
+            int index = this.fieldInfoList.IndexOf(this.currentFieldInfo);
+            if (index != -1 && index < this.fieldInfoList.Count - 1)
+            {
+                this.currentFieldInfo = this.fieldInfoList[index + 1];
+            }
+            return this.currentFieldInfo.index + this.currentFieldInfo.length;
+        }
+
+        /// <summary>
+        /// カレンダーで日付選択（CloseUp）
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void dateTimePicker1_CloseUp(object sender, EventArgs e)
+        {
+            //// 日付/時刻の値を更新
+            //this.Value = this.dateTimePicker1.Value;
+        }
+
+        /// <summary>
+        /// キー押下（KeyPress）
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void fwTextBox1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar >= '0' && e.KeyChar <= '9')
+            {
+                foreach (FieldInfo finfo in this.fieldInfoList)
+                {
+                    int pos = this.fwTextBox1.SelectionStart;
+                    if (pos >= finfo.index)
+                    {
+                        this.currentFieldInfo = finfo;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                this.fwTextBox1.Select(this.currentFieldInfo.getPosition(), 0);
+
+                //TextBox textbox = this.fwTextBox1;
+
+                //if (textbox.SelectionStart < textbox.Text.Length)
+                //{
+                //    // 文字挿入位置を調整（"_"の上以外は入力不可）
+                //    char c = textbox.Text[textbox.SelectionStart];
+                //    if (Regex.IsMatch(c.ToString(), "[^_0-9]"))
+                //    {
+                //        textbox.SelectionStart = textbox.SelectionStart + 1;
+                //    }
+                //}
+                //else
+                //{
+                //    e.Handled = true;
+                //}
+            }
+        }
+
+        /// <summary>
+        /// テキスト変更（TextChanged）
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void fwTextBox1_TextChanged(object sender, EventArgs e)
+        {
+            if (this.fwTextBox1.Focused)
+            {
+                // テキストのフォーマット
+                this.FormatText(this.Text);
+            }
+        }
+
+        private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
+        {
+            // 日付/時刻の値を更新
+            this.Value = this.dateTimePicker1.Value;
+        }
+
+        private void fwTextBox1_MouseClick(object sender, MouseEventArgs e)
+        {
+            this.UpdateCurrentField();
+
+
+            //foreach (FieldInfo finfo in this.fieldInfoList)
+            //{
+            //    int pos = this.fwTextBox1.SelectionStart;
+            //    if (pos >= finfo.index)
+            //    {
+            //        this.currentFieldInfo = finfo;
+            //    }
+            //    else
+            //    {
+            //        break;
+            //    }
+            //}
+            //this.fwTextBox1.Select(this.currentFieldInfo.getPosition(), 0);
+        }
+
+        private void fwTextBox1_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+        {
+            //int adjust = 0;
+            //int index = this.fieldInfoList.IndexOf(this.currentFieldInfo);
+
+            //if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
+            //{
+            //    if (index != -1)
+            //    {
+            //        switch (e.KeyCode)
+            //        {
+            //            case Keys.Left:
+            //                if (index > 0)
+            //                {
+            //                    index--;
+            //                }
+            //                adjust = 1;
+            //                break;
+            //            case Keys.Right:
+            //                if (index < this.fieldInfoList.Count - 1)
+            //                {
+            //                    index++;
+            //                }
+            //                adjust = -1;
+            //                break;
+            //        }
+            //        this.currentFieldInfo = this.fieldInfoList[index];
+            //        this.fwTextBox1.Select(this.currentFieldInfo.getPosition() + adjust, 0);
+            //    }
+            //}
+
+            switch (e.KeyCode)
+            {
+                case Keys.Left:
+                    this.SetPrevtPosition();
+                    break;
+                case Keys.Right:
+                    this.SetNextPosition();
+                    break;
+            }
+        }
+
+        private void fwTextBox1_Enter(object sender, EventArgs e)
+        {
+            if (this.currentFieldInfo == null && this.fieldInfoList.Count > 0)
+            {
+                this.currentFieldInfo = this.fieldInfoList[0];
+            }
+            this.fwTextBox1.Select(this.currentFieldInfo.getPosition(), 0);
+        }
+
+        private void FwDateTime_Enter(object sender, EventArgs e)
+        {
+            this.fwTextBox1.Focus();
+        }
+
+
+        private void UpdateCurrentField()
+        {
+            int pos = this.fwTextBox1.SelectionStart;
+
+            for (int i = 0; i < this.fieldInfoList.Count; i++)
+            {
+                FieldInfo finfo = this.fieldInfoList[i];
+
+                if (pos >= finfo.index)
+                {
+                    this.currentFieldInfo = finfo;
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
+        private FieldInfo GetFieldInfo(int pos)
+        {
+            foreach (FieldInfo finfo in this.fieldInfoList)
+            {
+                if (pos >= finfo.index && pos < finfo.index+finfo.length)
+                {
+                    return finfo;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            return null;
+        }
+
+        private void SetPrevtPosition(int count = 1)
+        {
+            int pos = this.fwTextBox1.SelectionStart;
+
+            for (int i = pos; i >= 0; i--)
+            {
+                if (Regex.IsMatch(this.placeholder[i].ToString(), "[^_]"))
+                {
+                    pos++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            this.fwTextBox1.Select(pos, 0);
+        }
+
+        private void SetNextPosition(int count = 1)
+        {
+            int pos = this.fwTextBox1.SelectionStart + count;
+            FieldInfo finfo = this.GetFieldInfo(pos);
+
+            if (finfo != null)
+            {
+                if(pos == finfo.index)
+                {
+                    pos++;
+                }
+            }
+            else
+            {
+                
+            }
+
+
+
+            //int pos = this.fwTextBox1.SelectionStart;
+
+            //for (int i = pos; i < this.placeholder.Length; i++)
+            //{
+            //    if (Regex.IsMatch(this.placeholder[i].ToString(), "[^_]"))
+            //    {
+            //        pos++;
+            //    }
+            //    else
+            //    {
+            //        break;
+            //    }
+            //}
+            //this.fwTextBox1.Select(pos, 0);
+        }
+    }
+}
