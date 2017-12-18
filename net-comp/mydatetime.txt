@@ -360,6 +360,11 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
                     }
                     catch { }
                 }
+                else if (text.Equals(this.placeholder))
+                {
+                    // 全桁クリアの場合は、日付/時刻の値をNULLクリアする
+                    this.Value = null;
+                }
             }
             else
             {
