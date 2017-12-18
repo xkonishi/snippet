@@ -217,17 +217,6 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
         }
 
         /// <summary>
-        /// カレンダーで日付選択（CloseUp）
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void dateTimePicker1_CloseUp(object sender, EventArgs e)
-        {
-            // 日付/時刻の値を更新
-            this.Value = this.dateTimePicker1.Value;
-        }
-
-        /// <summary>
         /// キー押下（KeyPress）
         /// </summary>
         /// <param name="sender"></param>
@@ -266,6 +255,17 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
                 // テキストのフォーマット
                 this.FormatText(this.Text);
             }
+        }
+
+        /// <summary>
+        /// カレンダーで日付選択（ValueChanged）
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
+        {
+            // 日付/時刻の値を更新
+            this.Value = this.dateTimePicker1.Value;
         }
     }
 }
