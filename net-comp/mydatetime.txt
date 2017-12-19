@@ -187,7 +187,7 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
         public override string Text
         {
             get => (this.fwTextBox1.Text.Equals(this.placeholder)) ? "" : this.fwTextBox1.Text;
-            set => this.fwTextBox1.Text = value;
+            set => this.fwTextBox1.Text = (string.IsNullOrEmpty(value)) ? this.placeholder : value;
         }
         /// <summary>
         /// プレースホルダ
