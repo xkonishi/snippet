@@ -362,11 +362,8 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
         /// <param name="e"></param>
         private void FwNumber_TextChanged(object sender, System.EventArgs e)
         {
-            if (this.Focused)
-            {
-                // テキストのフォーマット
-                this.FormatText(this.Text);
-            }
+            // テキストのフォーマット
+            this.FormatText(this.Text);
         }
     }
 }
