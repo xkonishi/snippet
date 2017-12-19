@@ -518,11 +518,8 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
         /// <param name="e"></param>
         private void fwTextBox1_TextChanged(object sender, EventArgs e)
         {
-            if (this.fwTextBox1.Focused)
-            {
-                // テキストのフォーマット
-                this.FormatText(this.Text);
-            }
+            // テキストのフォーマット
+            this.FormatText(this.Text);
         }
 
         /// <summary>
