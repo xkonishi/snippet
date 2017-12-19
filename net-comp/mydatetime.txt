@@ -189,6 +189,12 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
             get => (this.fwTextBox1.Text.Equals(this.placeholder)) ? "" : this.fwTextBox1.Text;
             set => this.fwTextBox1.Text = (string.IsNullOrEmpty(value)) ? this.placeholder : value;
         }
+
+        /// <summary>
+        /// 背景色
+        /// </summary>
+        public override Color BackColor { get => this.fwTextBox1.BackColor; set => this.fwTextBox1.BackColor = value; }
+
         /// <summary>
         /// プレースホルダ
         /// </summary>
@@ -356,14 +362,20 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
                             dt = this.MaxDate;
                             text = this.MaxDate.ToString(this.CustomFormat);
                         }
-                        this.Value = dt;
+                        this._value = dt;
+
+                        // DateTimePickerのValueのValueも更新
+                        this.dateTimePicker1.Value = dt;
                     }
-                    catch { }
+                    catch
+                    {
+                        this._value = null;
+                    }
                 }
-                else if (text.Equals(this.placeholder))
+                else
                 {
-                    // 全桁クリアの場合は、日付/時刻の値をNULLクリアする
-                    this.Value = null;
+                    // 入力途中、および入力クリアの場合は、日付/時刻の値をNULLクリアする
+                    this._value = null;
                 }
             }
             else
@@ -372,7 +384,7 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
                 // Valueプロパティ設定時
                 // ------------------------
 
-                text = (this.Value.HasValue) ? ((DateTime)this.Value).ToString(this.CustomFormat) : this.placeholder;
+                text = (this._value.HasValue) ? ((DateTime)this._value).ToString(this.CustomFormat) : this.placeholder;
             }
 
             // 日付文字列の設定
@@ -530,7 +542,10 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
         private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
         {
             // 日付/時刻の値を更新
-            this.Value = this.dateTimePicker1.Value;
+            this._value = this.dateTimePicker1.Value;
+
+            // テキストのフォーマット
+            this.FormatText();
         }
     }
 }
