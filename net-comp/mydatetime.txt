@@ -373,9 +373,6 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
                 // ------------------------
 
                 text = (this.Value.HasValue) ? ((DateTime)this.Value).ToString(this.CustomFormat) : this.placeholder;
-
-                // テキストボックスにフォーカス移動
-                this.fwTextBox1.Focus();
             }
 
             // 日付文字列の設定
