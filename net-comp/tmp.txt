@@ -425,22 +425,25 @@ namespace WindowsFormsApp4
                     year = GetFieldValue(text, FormatType.Year);
                     month = GetFieldValue(text, FormatType.Month);
                     day = GetFieldValue(text, FormatType.Day);
-                    if (year.HasValue && (month.HasValue && day.HasValue))
+                    if (year.HasValue && month.HasValue && day.HasValue)
                     {
-                        FieldInfo finfoDay = GetFieldInfo(FormatType.Day);
                         if (month == 2)
                         {
-                            if (DateTime.IsLeapYear(year.Value))
+                            FieldInfo finfoDay = GetFieldInfo(FormatType.Day);
+                            if (finfoDay != null)
                             {
-                                if (day > 29)
+                                if (DateTime.IsLeapYear(year.Value))
                                 {
-                                    text = text.Substring(0, finfoDay.index) + "29" + text.Substring(finfoDay.index + finfoDay.length);
-                                    break;
+                                    if (day > 29)
+                                    {
+                                        text = text.Substring(0, finfoDay.index) + "29" + text.Substring(finfoDay.index + finfoDay.length);
+                                        break;
+                                    }
                                 }
-                            }
-                            if (day > 28)
-                            {
-                                text = text.Substring(0, finfoDay.index) + "28" + text.Substring(finfoDay.index + finfoDay.length);
+                                if (day > 28)
+                                {
+                                    text = text.Substring(0, finfoDay.index) + "28" + text.Substring(finfoDay.index + finfoDay.length);
+                                }
                             }
                         }
                     }
