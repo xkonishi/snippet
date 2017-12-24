@@ -536,18 +536,18 @@ namespace WindowsFormsApp4
                         text = text.Substring(0, start) + this.placeholder.Substring(start, -cnt) + text.Substring(start);
                     }
 
-                    // フィールドの途中から貼り付けた場合、前を"０"で埋める
-                    FieldInfo finfo = this.GetFieldInfo(start);
-                    if (finfo != null)
-                    {
-                        for (int i = finfo.index; i < start; i++)
-                        {
-                            if (text[i] == '_')
-                            {
-                                text = text.Remove(i, 1).Insert(i, "0");
-                            }
-                        }
-                    }
+                    //// フィールドの途中から貼り付けた場合、前を"０"で埋める
+                    //FieldInfo finfo = this.GetFieldInfo(start);
+                    //if (finfo != null)
+                    //{
+                    //    for (int i = finfo.index; i < start; i++)
+                    //    {
+                    //        if (text[i] == '_')
+                    //        {
+                    //            text = text.Remove(i, 1).Insert(i, "0");
+                    //        }
+                    //    }
+                    //}
 
                     for (int i = start; i < text.Length; i++)
                     {
@@ -559,17 +559,26 @@ namespace WindowsFormsApp4
                                 text = text.Remove(i, 1).Insert(i, this.fwTextBox1.PastedText[0].ToString());
                                 this.fwTextBox1.PastedText = this.fwTextBox1.PastedText.Remove(0, 1);
 
-                                // フィールドの入力が完了した場合、妥当性チェックを行う
-                                finfo = this.GetFieldInfo(i);
-                                string val = text.Substring(finfo.index, finfo.length);
-                                if (!val.Contains("_"))
+                                //// フィールドの入力が完了した場合、妥当性チェックを行う
+                                //finfo = this.GetFieldInfo(i);
+                                //string val = text.Substring(finfo.index, finfo.length);
+                                //if (!val.Contains("_"))
+                                //{
+                                //    string validval = finfo.GetValidValue(val, this.MinDate.Year, this.MaxDate.Year);
+                                //    if (!val.Equals(validval))
+                                //    {
+                                //        // 妥当でなければ、有効な値に置き換える
+                                //        text = text.Substring(0, finfo.index) + validval + text.Substring(finfo.index + finfo.length);
+                                //    }
+                                //}
+
+                                int current = i + 1;
+                                FieldInfo finfo = this.GetFieldInfo(i);
+                                this.AdjustValue(ref text, ref current, finfo);
+                                if(current != (i + 1))
                                 {
-                                    string validval = finfo.GetValidValue(val, this.MinDate.Year, this.MaxDate.Year);
-                                    if (!val.Equals(validval))
-                                    {
-                                        // 妥当でなければ、有効な値に置き換える
-                                        text = text.Substring(0, finfo.index) + validval + text.Substring(finfo.index + finfo.length);
-                                    }
+                                    i = current - 1;
+                                    pos++;
                                 }
                             }
                             else
