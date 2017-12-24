@@ -349,11 +349,15 @@ namespace WindowsFormsApp4
             InitializeComponent();
         }
 
-        private void AdjustValue(ref string text, ref int pos, FieldInfo finfo)
+        private int AdjustValue(ref string text, int editpos, FieldInfo finfo)
         {
+            int pluspos = 0;
+
+            int? year;
+            int? month;
+            int? day;
+
             string val = text.Substring(finfo.index, finfo.length);
-            int editpos = pos - 1;
-            int? year, month, day;
 
             if (finfo.index == editpos)
             {
@@ -389,7 +393,8 @@ namespace WindowsFormsApp4
                         {
                             val = string.Format("{0:D2}", intval);
                             text = text.Substring(0, finfo.index) + val + text.Substring(finfo.index + finfo.length);
-                            pos++;
+
+                            pluspos = 1;
                         }
                         else
                         {
@@ -502,6 +507,8 @@ namespace WindowsFormsApp4
                     }
                     break;
             }
+
+            return pluspos;
         }
 
         /// <summary>
@@ -572,14 +579,12 @@ namespace WindowsFormsApp4
                                 //    }
                                 //}
 
-                                int current = i + 1;
+                                int editpos = i;
                                 FieldInfo finfo = this.GetFieldInfo(i);
-                                this.AdjustValue(ref text, ref current, finfo);
-                                if(current != (i + 1))
-                                {
-                                    i = current - 1;
-                                    pos++;
-                                }
+                                int ret = this.AdjustValue(ref text, editpos, finfo);
+
+                                i += ret;
+                                pos += ret;
                             }
                             else
                             {
@@ -631,10 +636,11 @@ namespace WindowsFormsApp4
                         text = inputText;
                     }
 
-                    FieldInfo finfo = this.GetFieldInfo(pos - 1);
+                    int editpos = pos - 1;
+                    FieldInfo finfo = this.GetFieldInfo(editpos);
                     if (finfo != null)
                     {
-                        this.AdjustValue(ref text, ref pos, finfo);
+                        pos += this.AdjustValue(ref text, editpos, finfo);
                     }
                 }
 
