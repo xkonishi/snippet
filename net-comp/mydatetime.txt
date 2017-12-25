@@ -196,11 +196,6 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
         private string placeholder;
 
         /// <summary>
-        /// エラープロバイダー
-        /// </summary>
-        private ErrorProvider errorprovider = new ErrorProvider();
-
-        /// <summary>
         /// コンストラクタ
         /// </summary>
         public FwDateTime()
