@@ -65,152 +65,6 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
             {
                 return this.type.Equals(FormatType.None);
             }
-
-            /// <summary>
-            /// 入力値が有効な値か判定する
-            /// </summary>
-            /// <param name="val"></param>
-            /// <param name="pos"></param>
-            /// <returns></returns>
-            public bool IsValidValue(string val, int pos)
-            {
-                int intval;
-
-                if (!val.Contains("_") && this.index < pos)
-                {
-                    if (int.TryParse(val, out intval))
-                    {
-                        switch (this.type)
-                        {
-                            case FormatType.Year:       // 年
-                                break;
-                            case FormatType.Month:      // 月（０１～１２）
-                                return (intval == Math.Min(Math.Max(intval, 1), 12));
-                            case FormatType.Day:        // 日（０１～３１）
-                                return (intval == Math.Min(Math.Max(intval, 1), 31));
-                            case FormatType.Hour:       // 時（０１～２３）
-                                return (intval == Math.Min(Math.Max(intval, 0), 23));
-                            case FormatType.Minute:     // 分（００～５９）
-                                return (intval == Math.Min(Math.Max(intval, 0), 59));
-                            case FormatType.Second:     // 秒（００～５９）
-                                return (intval == Math.Min(Math.Max(intval, 0), 59));
-                        }
-                    }
-                }
-                return true;
-            }
-
-            /// <summary>
-            /// 入力値より有効な値を返却する
-            /// </summary>
-            /// <param name="val"></param>
-            /// <param name="minYear"></param>
-            /// <param name="maxYear"></param>
-            /// <returns></returns>
-            public string GetValidValue(string val, int minYear = 1, int maxYear = 9999)
-            {
-                int intval;
-
-                if (!val.Contains("_"))
-                {
-                    if (int.TryParse(val, out intval))
-                    {
-                        switch (this.type)
-                        {
-                            case FormatType.Year:       // 年
-                                intval = Math.Min(Math.Max(intval, minYear), maxYear);
-                                break;
-                            case FormatType.Month:      // 月（０１～１２）
-                                intval = Math.Min(Math.Max(intval, 1), 12);
-                                break;
-                            case FormatType.Day:        // 日（０１～３１）
-                                intval = Math.Min(Math.Max(intval, 1), 31);
-                                break;
-                            case FormatType.Hour:       // 時（０１～２３）
-                                intval = Math.Min(Math.Max(intval, 0), 23);
-                                break;
-                            case FormatType.Minute:     // 分（００～５９）
-                                intval = Math.Min(Math.Max(intval, 0), 59);
-                                break;
-                            case FormatType.Second:     // 秒（００～５９）
-                                intval = Math.Min(Math.Max(intval, 0), 59);
-                                break;
-                        }
-
-                        int len = (this.type.Equals(FormatType.Year)) ? 4 : 2;
-                        string fmt = "{0:D" + len + "}";
-                        return string.Format(fmt, intval);
-                    }
-                }
-
-                return val;
-            }
-
-            public string GetValidValue(string val, ref int pos, int cnt, int minYear = 1, int maxYear = 9999)
-            {
-                int intval;
-                int editpos = pos - cnt;
-
-                if (this.index == editpos)
-                {
-                    // １文字目入力時、入力値が入力不可の場合は、０を加えて２文字目とする（例：３→０３）
-                    if (int.TryParse(val.Substring(0, 1), out intval))
-                    {
-                        int max = -1;
-                        switch (this.type)
-                        {
-                            case FormatType.Month:      // 月（０１～１２）
-                                max = 1;
-                                break;
-                            case FormatType.Day:        // 日（０１～３１）
-                                max = 3;
-                                break;
-                            case FormatType.Hour:       // 時（０１～２３）
-                                max = 2;
-                                break;
-                            case FormatType.Minute:     // 分（００～５９）
-                                max = 5;
-                                break;
-                            case FormatType.Second:     // 秒（００～５９）
-                                max = 5;
-                                break;
-                        }
-
-                        if (max != -1)
-                        {
-                            if (intval > max)
-                            {
-                                pos++;
-                                return string.Format("{0:D2}", intval);
-                            }
-                            else
-                            {
-                                // １文字目入力OKでも、２文字目が上下限を超えている場合は２文字目を０にする
-                                if (!val.Contains("_"))
-                                {
-                                    if (!val.Equals(this.GetValidValue(val, minYear, maxYear)))
-                                    {
-                                        val = val.Remove(1, 1).Insert(1, "0");
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                else if (this.index < editpos)
-                {
-                    // ２文字目以降の入力時、未入力部分を０で埋める
-                    for (int i = 0; i < (editpos - this.index); i++)
-                    {
-                        if (val[i] == '_')
-                        {
-                            val = val.Remove(i, 1).Insert(i, "0");
-                        }
-                    }
-                }
-
-                return this.GetValidValue(val, minYear, maxYear);
-            }
         }
 
         /// <summary>
@@ -278,18 +132,6 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
         }
 
         /// <summary>
-        /// 日付の最大値
-        /// </summary>
-        [Category("値"), Description("入力可能な日付の最大値を取得または設定します。")]
-        public DateTime MaxDate { get => this.dateTimePicker1.MaxDate; set => this.dateTimePicker1.MaxDate = value; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        [Category("値"), Description("入力可能な日付の最小値を取得または設定します。")]
-        public DateTime MinDate { get => this.dateTimePicker1.MinDate; set => this.dateTimePicker1.MinDate = value; }
-
-        /// <summary>
         /// 日付/時刻の値
         /// </summary>
         [Category("値"), Description("日付/時刻の値を取得または設定します。")]
@@ -313,6 +155,25 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
                 this.FormatText();
             }
         }
+
+        /// <summary>
+        /// 日付の最大値
+        /// </summary>
+        [Category("値"), Description("入力可能な日付の最大値を取得または設定します。")]
+        public DateTime MaxDate { get => this.dateTimePicker1.MaxDate; set => this.dateTimePicker1.MaxDate = value; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [Category("値"), Description("入力可能な日付の最小値を取得または設定します。")]
+        public DateTime MinDate { get => this.dateTimePicker1.MinDate; set => this.dateTimePicker1.MinDate = value; }
+
+        /// <summary>
+        /// 値が範囲外の場合の振る舞い
+        /// </summary>
+        [Category("動作"), Description("値が範囲外の場合にその値をどのように制御するかを取得または設定します。")]
+        [TypeConverter(typeof(MaxMinBehavior))]
+        public string MaxMinBehavior { get; set; } = "AdjustToMaxMin";
 
         /// <summary>
         /// 日付文字列
@@ -348,6 +209,343 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
         }
 
         /// <summary>
+        /// フィールド情報取得（キャレット位置より）
+        /// </summary>
+        /// <param name="pos"></param>
+        /// <returns></returns>
+        private FieldInfo GetFieldInfo(int pos)
+        {
+            foreach (FieldInfo finfo in this.fieldInfoList)
+            {
+                if (pos >= finfo.index && pos < finfo.index + finfo.length)
+                {
+                    return finfo;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// フィールド情報取得（書式タイプより）
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        private FieldInfo GetFieldInfo(FormatType type)
+        {
+            foreach (FieldInfo finfo in this.fieldInfoList)
+            {
+                if (type == finfo.type)
+                {
+                    return finfo;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// 前のフィールド情報取得
+        /// </summary>
+        /// <param name="finfo"></param>
+        /// <param name="skipSeparator"></param>
+        /// <returns></returns>
+        private FieldInfo GetPrevFieldInfo(FieldInfo finfo, bool skipSeparator = false)
+        {
+            FieldInfo prev = null;
+
+            int index = this.fieldInfoList.IndexOf(finfo);
+            if (index != -1)
+            {
+                index--;
+                if (index >= 0)
+                {
+                    prev = this.fieldInfoList[index];
+                    if (skipSeparator && prev.isSeparator())
+                    {
+                        index--;
+                        if (index >= 0)
+                        {
+                            prev = this.fieldInfoList[index];
+                        }
+                    }
+                }
+            }
+            return prev;
+        }
+
+        /// <summary>
+        /// 次のフィールド情報取得
+        /// </summary>
+        /// <param name="finfo"></param>
+        /// <param name="skipSeparator"></param>
+        /// <returns></returns>
+        private FieldInfo GetNextFieldInfo(FieldInfo finfo, bool skipSeparator = false)
+        {
+            FieldInfo next = null;
+
+            int index = this.fieldInfoList.IndexOf(finfo);
+            if (index != -1)
+            {
+                index++;
+                if (index < this.fieldInfoList.Count)
+                {
+                    next = this.fieldInfoList[index];
+                    if (skipSeparator && next.isSeparator())
+                    {
+                        index++;
+                        if (index < this.fieldInfoList.Count)
+                        {
+                            next = this.fieldInfoList[index];
+                        }
+                    }
+                }
+            }
+            return next;
+        }
+
+        /// <summary>
+        /// フィールド値を取得
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        private int? GetFieldValue(string input, FormatType type)
+        {
+            FieldInfo finfo = GetFieldInfo(type);
+            if (finfo != null)
+            {
+                string val = input.Substring(finfo.index, finfo.length);
+
+                int intval;
+                if (int.TryParse(val, out intval))
+                {
+                    return intval;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// 指定したフィールドの値が有効かどうか判定する
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        private bool IsValidValue(string input, FormatType type)
+        {
+            int? intval = GetFieldValue(input, type);
+
+            if (intval.HasValue)
+            {
+                switch (type)
+                {
+                    case FormatType.Year:
+                        return (intval >= 1 && intval <= 9999);
+                    case FormatType.Month:
+                        return (intval >= 1 && intval <= 12);
+                    case FormatType.Day:
+                        int? month = GetFieldValue(input, FormatType.Month);
+                        if (month.HasValue)
+                        {
+                            switch (month)
+                            {
+                                case 2:
+                                    int? year = GetFieldValue(input, FormatType.Year);
+                                    if (year.HasValue)
+                                    {
+                                        if (DateTime.IsLeapYear(year.Value))
+                                        {
+                                            return (intval >= 1 && intval <= 29);
+                                        }
+                                    }
+                                    return (intval >= 1 && intval <= 28);
+                                case 4:
+                                case 6:
+                                case 9:
+                                case 11:
+                                    return (intval >= 1 && intval <= 30);
+                                case 1:
+                                case 3:
+                                case 5:
+                                case 7:
+                                case 8:
+                                case 10:
+                                case 12:
+                                    return (intval >= 1 && intval <= 31);
+                            }
+                        }
+                        return (intval >= 1 && intval <= 31);
+                    case FormatType.Hour:
+                        return (intval >= 0 && intval <= 23);
+                    case FormatType.Minute:
+                        return (intval >= 0 && intval <= 59);
+                    case FormatType.Second:
+                        return (intval >= 0 && intval <= 59);
+                }
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 日付入力値の補正
+        /// </summary>
+        /// <param name="text">入力日付</param>
+        /// <param name="editpos">文字挿入位置</param>
+        /// <param name="finfo">文字挿入位置のフィールド情報</param>
+        /// <returns></returns>
+        private int AdjustValue(ref string text, int editpos, FieldInfo finfo)
+        {
+            // 文字挿入位置の補正値
+            int pluspos = 0;
+
+            int? year;
+            int? month;
+            int? day;
+
+            string val = text.Substring(finfo.index, finfo.length);
+
+            // -------------------------
+            // 編集フィールドの補正
+            // -------------------------
+            if (finfo.index == editpos)
+            {
+                int intval;
+
+                if (int.TryParse(val.Substring(0, 1), out intval))
+                {
+                    int max = -1;
+                    switch (finfo.type)
+                    {
+                        case FormatType.Month:      // 月（０１～１２）
+                            max = 1;
+                            break;
+                        case FormatType.Day:        // 日（０１～３１）
+                            month = GetFieldValue(text, FormatType.Month);
+                            max = (month == 2) ? 2 : 3;
+                            break;
+                        case FormatType.Hour:       // 時（０１～２３）
+                            max = 2;
+                            break;
+                        case FormatType.Minute:     // 分（００～５９）
+                            max = 5;
+                            break;
+                        case FormatType.Second:     // 秒（００～５９）
+                            max = 5;
+                            break;
+                    }
+
+                    if (max != -1)
+                    {
+                        // １文字目入力時、入力値が入力不可の場合は、０を加えて２文字目とする（例：３→０３）
+                        if (intval > max)
+                        {
+                            val = string.Format("{0:D2}", intval);
+                            text = text.Substring(0, finfo.index) + val + text.Substring(finfo.index + finfo.length);
+
+                            // 文字挿入位置の補正値を１とする
+                            pluspos = 1;
+                        }
+                        else
+                        {
+                            // １文字目入力OKでも、２文字目が上下限を超えている場合は２文字目を０にする
+                            if (!val.Contains("_"))
+                            {
+                                if (!this.IsValidValue(text, finfo.type))
+                                {
+                                    val = val.Remove(1, 1).Insert(1, "0");
+                                    text = text.Substring(0, finfo.index) + val + text.Substring(finfo.index + finfo.length);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else if (finfo.index < editpos && !text.Substring(editpos, 1).Equals("_"))
+            {
+                // ２文字目以降の入力時、未入力部分を０で埋める
+                for (int i = 0; i < (editpos - finfo.index); i++)
+                {
+                    if (val[i] == '_')
+                    {
+                        val = val.Remove(i, 1).Insert(i, "0");
+                    }
+                }
+                text = text.Substring(0, finfo.index) + val + text.Substring(finfo.index + finfo.length);
+            }
+
+            // -------------------------
+            // 編集フィールド以外の補正
+            // -------------------------
+            switch (finfo.type)
+            {
+                case FormatType.Year:
+                    year = GetFieldValue(text, FormatType.Year);
+                    month = GetFieldValue(text, FormatType.Month);
+                    day = GetFieldValue(text, FormatType.Day);
+                    if (year.HasValue && month.HasValue && day.HasValue)
+                    {
+                        // 年の編集時、うるう年を考慮して日を補正する
+                        if (month == 2)
+                        {
+                            FieldInfo finfoDay = GetFieldInfo(FormatType.Day);
+                            if (finfoDay != null)
+                            {
+                                int maxday = (DateTime.IsLeapYear(year.Value)) ? 29 : 28;
+                                if (day > maxday)
+                                {
+                                    text = text.Substring(0, finfoDay.index) + maxday.ToString() + text.Substring(finfoDay.index + finfoDay.length);
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case FormatType.Month:
+                    month = GetFieldValue(text, FormatType.Month);
+                    day = GetFieldValue(text, FormatType.Day);
+                    if (month.HasValue && day.HasValue)
+                    {
+                        // 月を編集時、うるう年を考慮して日を補正する
+                        FieldInfo finfoDay = GetFieldInfo(FormatType.Day);
+                        if (finfoDay != null)
+                        {
+                            int maxday = 0;
+
+                            switch (month)
+                            {
+                                case 2:
+                                    year = GetFieldValue(text, FormatType.Year);
+                                    maxday = (year.HasValue && DateTime.IsLeapYear(year.Value)) ? 29 : 28;
+                                    break;
+                                case 4:
+                                case 6:
+                                case 9:
+                                case 11:
+                                    maxday = 30;
+                                    break;
+                                case 1:
+                                case 3:
+                                case 5:
+                                case 7:
+                                case 8:
+                                case 10:
+                                case 12:
+                                    maxday = 31;
+                                    break;
+                            }
+
+                            // 最大日を超えている場合は最大日に補正する
+                            if (day > maxday)
+                            {
+                                text = text.Substring(0, finfoDay.index) + maxday.ToString() + text.Substring(finfoDay.index + finfoDay.length);
+                            }
+                        }
+                    }
+                    break;
+            }
+
+            return pluspos;
+        }
+
+        /// <summary>
         /// テキストのフォーマット
         /// </summary>
         /// <param name="inputText"></param>
@@ -379,19 +577,6 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
                         text = text.Substring(0, start) + this.placeholder.Substring(start, -cnt) + text.Substring(start);
                     }
 
-                    // フィールドの途中から貼り付けた場合、前を"０"で埋める
-                    FieldInfo finfo = this.GetFieldInfo(start);
-                    if (finfo != null)
-                    {
-                        for (int i = finfo.index; i < start; i++)
-                        {
-                            if (text[i] == '_')
-                            {
-                                text = text.Remove(i, 1).Insert(i, "0");
-                            }
-                        }
-                    }
-
                     for (int i = start; i < text.Length; i++)
                     {
                         if (this.fwTextBox1.PastedText.Length > 0)
@@ -402,18 +587,14 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
                                 text = text.Remove(i, 1).Insert(i, this.fwTextBox1.PastedText[0].ToString());
                                 this.fwTextBox1.PastedText = this.fwTextBox1.PastedText.Remove(0, 1);
 
-                                // フィールドの入力が完了した場合、妥当性チェックを行う
-                                finfo = this.GetFieldInfo(i);
-                                string val = text.Substring(finfo.index, finfo.length);
-                                if (!val.Contains("_"))
-                                {
-                                    string validval = finfo.GetValidValue(val, this.MinDate.Year, this.MaxDate.Year);
-                                    if (!val.Equals(validval))
-                                    {
-                                        // 妥当でなければ、有効な値に置き換える
-                                        text = text.Substring(0, finfo.index) + validval + text.Substring(finfo.index + finfo.length);
-                                    }
-                                }
+                                // 入力値の補正
+                                int editpos = i;
+                                FieldInfo finfo = GetFieldInfo(i);
+                                int ret = this.AdjustValue(ref text, editpos, finfo);
+
+                                // 文字挿入位置の補正
+                                i += ret;
+                                pos += ret;
                             }
                             else
                             {
@@ -442,18 +623,6 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
                     {
                         // 上書きモードにするため、１文字削除
                         text = inputText.Remove(pos, 1);
-
-                        FieldInfo finfo = this.GetFieldInfo(pos - cnt);
-                        if (finfo != null)
-                        {
-                            // 入力値が上下限値を超えているか、補正可能な場合は有効な値に置き換える
-                            string val = text.Substring(finfo.index, finfo.length);
-                            string validval = finfo.GetValidValue(val, ref pos, cnt, this.MinDate.Year, this.MaxDate.Year);
-                            if (!val.Equals(validval))
-                            {
-                                text = text.Substring(0, finfo.index) + validval + text.Substring(finfo.index + finfo.length);
-                            }
-                        }
                     }
                     else if (cnt < 0)
                     {
@@ -464,6 +633,24 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
                     {
                         text = inputText;
                     }
+
+                    // 入力値の補正＆文字挿入位置の補正
+                    int editpos = pos - 1;
+                    FieldInfo finfo = GetFieldInfo(editpos);
+                    if (finfo != null)
+                    {
+                        pos += this.AdjustValue(ref text, editpos, finfo);
+
+                        // 文字挿入位置がフィールド末尾の場合、次の文字挿入位置の先頭へ移動する
+                        if (pos == (finfo.index + finfo.length))
+                        {
+                            FieldInfo next = GetNextFieldInfo(finfo, true);
+                            if (next != null)
+                            {
+                                pos = next.index;
+                            }
+                        }
+                    }
                 }
 
                 // 全桁入力完了時、日付/時刻の値を更新する
@@ -471,22 +658,61 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
                 {
                     try
                     {
-                        DateTime dt = DateTime.ParseExact(text, this.CustomFormat, null);
+                        DateTime? dt = DateTime.ParseExact(text, this.CustomFormat, null);
 
                         if (dt < this.MinDate)
                         {
-                            dt = this.MinDate;
-                            text = this.MinDate.ToString(this.CustomFormat);
+                            switch (this.MaxMinBehavior)
+                            {
+                                case "AdjustToMaxMin":   // 値を最小値か最大値の地開放に設定します
+                                    dt = this.MinDate;
+                                    break;
+                                case "Clear":            // 値を削除してnull(Visual BasicではNothing)にします
+                                    dt = null;
+                                    break;
+                                case "Keep":             // 最後に入力された現在値を保持します
+                                    // そのまま
+                                    break;
+                                case "Restore":          // 変更前の値に戻します
+                                    dt = this._value;
+                                    break;
+                            }
                         }
                         if (dt > this.MaxDate)
                         {
-                            dt = this.MaxDate;
-                            text = this.MaxDate.ToString(this.CustomFormat);
+                            switch (this.MaxMinBehavior)
+                            {
+                                case "AdjustToMaxMin":   // 値を最小値か最大値の地開放に設定します
+                                    dt = this.MaxDate;
+                                    break;
+                                case "Clear":            // 値を削除してnull(Visual BasicではNothing)にします
+                                    dt = null;
+                                    break;
+                                case "Keep":             // 最後に入力された現在値を保持します
+                                    // そのまま
+                                    break;
+                                case "Restore":          // 変更前の値に戻します
+                                    dt = this._value;
+                                    break;
+                            }
                         }
-                        this._value = dt;
 
-                        // DateTimePickerのValueのValueも更新
-                        this.dateTimePicker1.Value = dt;
+                        if (dt.HasValue)
+                        {
+                            text = dt.Value.ToString(this.CustomFormat);
+
+                            // DateTimePickerのValueのValueも更新
+                            this.dateTimePicker1.Value = dt.Value;
+                        }
+                        else
+                        {
+                            text = this.placeholder;
+                        }
+
+                        if (!dt.Equals(this._value))
+                        {
+                            this._value = dt;
+                        }
                     }
                     catch
                     {
@@ -516,53 +742,6 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
         }
 
         /// <summary>
-        /// フィールド情報取得
-        /// </summary>
-        /// <param name="pos"></param>
-        /// <returns></returns>
-        private FieldInfo GetFieldInfo(int pos)
-        {
-            foreach (FieldInfo finfo in this.fieldInfoList)
-            {
-                if (pos >= finfo.index && pos < finfo.index + finfo.length)
-                {
-                    return finfo;
-                }
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// 前のフィールド情報取得
-        /// </summary>
-        /// <param name="finfo"></param>
-        /// <returns></returns>
-        private FieldInfo GetPrevFieldInfo(FieldInfo finfo)
-        {
-            int index = this.fieldInfoList.IndexOf(finfo);
-            if (index > 0)
-            {
-                return this.fieldInfoList[index - 1];
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// 次のフィールド情報取得
-        /// </summary>
-        /// <param name="finfo"></param>
-        /// <returns></returns>
-        private FieldInfo GetNextFieldInfo(FieldInfo finfo)
-        {
-            int index = this.fieldInfoList.IndexOf(finfo);
-            if (index < this.fieldInfoList.Count - 1)
-            {
-                return this.fieldInfoList[index + 1];
-            }
-            return null;
-        }
-
-        /// <summary>
         /// キー押下（KeyPress）
         /// </summary>
         /// <param name="sender"></param>
@@ -580,13 +759,13 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
 
                 if (pos < textbox.Text.Length)
                 {
-                    FieldInfo finfo = this.GetFieldInfo(pos);
+                    FieldInfo finfo = GetFieldInfo(pos);
                     if (finfo != null)
                     {
                         // セパレータの場合、文字挿入位置を次フィールドの先頭へ移動する
                         if (finfo.isSeparator())
                         {
-                            FieldInfo next = this.GetNextFieldInfo(finfo);
+                            FieldInfo next = GetNextFieldInfo(finfo);
                             if (next != null)
                             {
                                 this.fwTextBox1.SelectionStart = next.index;
@@ -598,12 +777,14 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
                         }
                         else
                         {
-                            // フィールド内での入力時は、入力値が妥当でなければ入力不可とする
-                            string newval = textbox.Text.Substring(0, pos) + e.KeyChar.ToString() + textbox.Text.Substring(pos + 1);
-                            string val = newval.Substring(finfo.index, finfo.length);
-                            if (!finfo.IsValidValue(val, pos))
+                            // フィールド末尾での入力時は、入力値が妥当でなければ入力不可とする
+                            if(pos == (finfo.index + finfo.length - 1))
                             {
-                                e.Handled = true;
+                                string newval = textbox.Text.Substring(0, pos) + e.KeyChar.ToString() + textbox.Text.Substring(pos + 1);
+                                if (!this.IsValidValue(newval, finfo.type))
+                                {
+                                    e.Handled = true;
+                                }
                             }
                         }
                     }
@@ -624,13 +805,13 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
                 {
                     if (textbox.SelectionLength == 0)
                     {
-                        FieldInfo finfo = this.GetFieldInfo(pos - 1);
+                        FieldInfo finfo = GetFieldInfo(pos - 1);
                         if (finfo != null)
                         {
                             // 文字挿入位置を調整（セパレータの場合、前フィールドの末尾へ）
                             if (finfo.isSeparator())
                             {
-                                FieldInfo prev = this.GetPrevFieldInfo(finfo);
+                                FieldInfo prev = GetPrevFieldInfo(finfo);
                                 if (prev != null)
                                 {
                                     textbox.SelectionStart = prev.index + prev.length;
@@ -678,6 +859,44 @@ namespace MySolutions.PrognerTemplate.Client.Support.Controls
 
             // テキストのフォーマット
             this.FormatText();
+        }
+    }
+}
+
+------------------------------------------------------------------------------------------------------------
+using System.ComponentModel;
+
+namespace CanonITSolutions.PrognerTemplate.Client.Support.Controls.DesignEditor
+{
+    /// <summary>
+    /// 日付コンポーネントが範囲外の場合の振る舞いの種類クラス（デザイナで使用する）
+    /// </summary>
+    class MaxMinBehavior : TypeConverter
+    {
+        /// <summary>
+        /// リスト選択サポート可否設定
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// リストデータの取得
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
+        {
+            string[] values = new string[] {
+                "AdjustToMaxMin",   // 値を最小値か最大値の地開放に設定します
+                "Clear",            // 値を削除してnull(Visual BasicではNothing)にします
+                "Keep",             // 最後に入力された現在値を保持します
+                "Restore"           // 変更前の値に戻します
+            };
+            return new StandardValuesCollection(values);
         }
     }
 }
