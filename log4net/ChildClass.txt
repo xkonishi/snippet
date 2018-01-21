@@ -1,0 +1,7 @@
+public class ChildClass : BaseClass
+{
+	private void Method()
+	{
+		this.GetLogger().Info("ABCD");
+	}
+}
