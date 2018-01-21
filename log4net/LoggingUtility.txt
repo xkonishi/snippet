@@ -4,6 +4,8 @@ using log4net.Config;
 public static class LoggingUtility
 {
 	private static readonly Dictionary<string, ILog> _loggers = new Dictionary<string, ILog>();
+
+	private static object lockObject = new object();
 	
 	public static ILog GetLogger(System.Type type)
 	{
