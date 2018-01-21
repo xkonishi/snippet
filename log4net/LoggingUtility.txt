@@ -7,12 +7,16 @@ public static class LoggingUtility
 	
 	public static ILog GetLogger(System.Type type)
 	{
-		var tn = type.FullName;
-		if (!_loggers.ContainsKey(tn))
+		lock (lockObject)
 		{
-			_loggers.Add(tn, LogManager.GetLogger(type));
+			var tn = type.FullName;
+			if (!_loggers.ContainsKey(tn))
+			{
+				_loggers.Add(tn, LogManager.GetLogger(type));
+			}
+
+			return _loggers[tn];
 		}
-		return _loggers[tn];
 	}	
 
 	public static void Initialize()
