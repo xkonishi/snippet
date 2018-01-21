@@ -1,0 +1,7 @@
+public class BaseClass
+{
+	protected ILog GetLogger()
+	{
+		return LoggingUtility.GetLogger(this.GetType());
+	}
+}
