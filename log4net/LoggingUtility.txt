@@ -1,0 +1,22 @@
+using log4net;
+using log4net.Config;
+
+public static class LoggingUtility
+{
+	private static readonly Dictionary<string, ILog> _loggers = new Dictionary<string, ILog>();
+	
+	public static ILog GetLogger(System.Type type)
+	{
+		var tn = type.FullName;
+		if (!_loggers.ContainsKey(tn))
+		{
+			_loggers.Add(tn, LogManager.GetLogger(type));
+		}
+		return _loggers[tn];
+	}	
+
+	public static void Initialize()
+	{
+		log4net.Config.XmlConfigurator.Configure(new System.IO.FileInfo(@"E:\VS2017\WindowsFormsApp5\log4net.config"));
+	}
+}
