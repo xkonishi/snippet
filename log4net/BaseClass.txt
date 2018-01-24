@@ -1,7 +1,4 @@
 public class BaseClass
 {
-	protected ILog GetLogger()
-	{
-		return LoggingUtility.GetLogger(this.GetType());
-	}
+	protected ILog Logger { get => LoggingUtility.GetLogger(this.GetType()); }
 }
