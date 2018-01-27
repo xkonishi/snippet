@@ -11,15 +11,28 @@ public static class LoggingUtility
 	{
 		lock (lockObject)
 		{
-			var tn = type.FullName;
-			if (!_loggers.ContainsKey(tn))
+			string name = type.FullName;
+			if (!_loggers.ContainsKey(name))
 			{
-				_loggers.Add(tn, LogManager.GetLogger(type));
+				_loggers.Add(name, LogManager.GetLogger(type));
 			}
 
-			return _loggers[tn];
+			return _loggers[name];
 		}
-	}	
+	}
+
+	public static ILog GetLogger(string name)
+	{
+		lock (lockObject)
+		{
+			if (!_loggers.ContainsKey(name))
+			{
+				_loggers.Add(name, LogManager.GetLogger(name));
+			}
+
+			return _loggers[name];
+		}
+	}
 
 	public static void Initialize()
 	{
