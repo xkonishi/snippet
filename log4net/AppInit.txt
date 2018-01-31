@@ -1,0 +1,5 @@
+string log4netConfig = System.Configuration.ConfigurationManager.AppSettings["log4netConfig"];
+if (!string.IsNullOrEmpty(log4netConfig))
+{
+	LoggerUtility.Initialize(log4netConfig);
+}
