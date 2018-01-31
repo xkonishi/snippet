@@ -34,19 +34,9 @@ public static class LoggingUtility
 		}
 	}
 
-	public static void Initialize()
+	public static void Initialize(string log4netConfig)
 	{
-		string log4netConfig = System.Configuration.ConfigurationManager.AppSettings["log4netConfig"];
-		if (log4netConfig != null)
-		{
-			log4net.Config.XmlConfigurator.Configure(new System.IO.FileInfo(log4netConfig));
-		}
+		XmlConfigurator.Configure(new System.IO.FileInfo(log4netConfig));
 	}
 }
 
-[App.config/Web.config]
-<configuration>
-  <appSettings>
-    <add key="log4netConfig" value="E:\VS2017\WindowsFormsApp5\log4net.config"/>
-  </appSettings>
-</configuration>
