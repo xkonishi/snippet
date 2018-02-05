@@ -6,6 +6,16 @@ public static class LoggingUtility
 	private static readonly Dictionary<string, ILog> _loggers = new Dictionary<string, ILog>();
 
 	private static object lockObject = new object();
+
+	public static void Initialize()
+	{
+		XmlConfigurator.Configure();
+	}
+
+	public static void Initialize(string log4netConfig)
+	{
+		XmlConfigurator.Configure(new System.IO.FileInfo(log4netConfig));
+	}
 	
 	public static ILog GetLogger(System.Type type)
 	{
@@ -32,11 +42,6 @@ public static class LoggingUtility
 
 			return _loggers[name];
 		}
-	}
-
-	public static void Initialize(string log4netConfig)
-	{
-		XmlConfigurator.Configure(new System.IO.FileInfo(log4netConfig));
 	}
 }
 
