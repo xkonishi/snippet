@@ -15,7 +15,7 @@ ENV TOMCAT_VERSION 8.5.32
 ENV CATALINA_HOME /usr/local/apache-tomcat-8.5.32
 ENV PATH ${CATALINA_HOME}/bin;${PATH}
 
-# PROGNER
+# PROG
 COPY tomcat/conf/context.xml ${CATALINA_HOME}/conf/context.xml
 COPY tomcat/conf/server.xml ${CATALINA_HOME}/conf/server.xml
 COPY tomcat/endorsed/*.jar ${CATALINA_HOME}/endorsed/
