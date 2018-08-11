@@ -2,7 +2,7 @@ version: '2'
 
 services:
   # PROG WEB/AP Server
-  progner:
+  prog:
     build: ../build/prog
     image: prog
     ports:
