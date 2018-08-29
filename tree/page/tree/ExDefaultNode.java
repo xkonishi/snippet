@@ -1,4 +1,4 @@
-package jp.co.canonits.prognerex.core.presentation_wicket.component.tree;
+package jp.co.mysample.component.tree;
 
 import java.io.Serializable;
 import java.util.ArrayList;

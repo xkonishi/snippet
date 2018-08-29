@@ -1,4 +1,4 @@
-package jp.co.canonits.prognerex.aptemplate_desktopaplike.CC3030.page;
+package jp.co.mysample.SP3030.page;
 
 import java.util.ArrayList;
 import java.util.List;
